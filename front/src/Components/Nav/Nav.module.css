@@ -1,0 +1,20 @@
+.nav {
+  background-color: var(--nav-color);
+  width: 100%;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  padding: 1rem;
+  display: flex;
+  flex-flow: row wrap;
+  align-items: center;
+  justify-content: space-between;
+}
+.logo {
+  width: 200px;
+}
+.links{
+    display: flex;
+    flex-flow: row wrap;
+    align-items: center;
+    justify-content: center;
+}

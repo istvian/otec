@@ -1,0 +1,17 @@
+.msg {
+  font-size: 0.9rem;
+  background-color: var(--red-color);
+  width: 100%;
+  padding: 1rem;
+  border-radius: 8px;
+  margin: 1rem 0;
+}
+.logo {
+  align-self: center;
+  height: 4rem;
+}
+.link {
+  align-self: center;
+  font-size: 0.9rem;
+  margin: 2rem 0 1rem 0;
+}

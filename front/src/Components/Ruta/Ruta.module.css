@@ -1,0 +1,7 @@
+.ruta {
+  color: #fff;
+  background-color: var(--ruta-color);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  margin: 0 0.5rem;
+}
