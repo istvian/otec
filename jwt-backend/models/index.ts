@@ -15,16 +15,4 @@ Usuario.belongsTo(Rol, {
 });
 
 
-// User.hasMany(Post);
-// Post.belongsTo(User);
-
-// Post.hasMany(Upvotes);
-// Post.hasMany(Downvotes);
-
-// Upvotes.belongsTo(User);
-// Downvotes.belongsTo(User);
-
-// Upvotes.belongsTo(Post);
-// Downvotes.belongsTo(Post);
-
 export { sequelize, Usuario, Rol };

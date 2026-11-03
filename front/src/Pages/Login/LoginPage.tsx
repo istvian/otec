@@ -7,7 +7,7 @@ import { Box } from "../../Components/Box/Box";
 import { Title } from "../../Components/Title/Title";
 import type { LoginData } from "../../types/general";
 import { Login } from "../../Helpers/APIConnector";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import useIsLogin from "../../Hooks/useIsLogin";
 
 export function LoginPage() {
@@ -18,7 +18,7 @@ export function LoginPage() {
   const [errorMsg, setErrorMsg] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  useIsLogin(isLoading, "/");
+  const nav = useNavigate();
 
   async function HandleSubmit() {
     setIsLoading(true);
@@ -26,6 +26,8 @@ export function LoginPage() {
       setIsLoading(false);
       if (res.error) {
         setErrorMsg(res.message);
+      } else {
+        nav("/");
       }
     });
   }

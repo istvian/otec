@@ -10,20 +10,25 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
   try {
     console.log(req.body);
     if (!req.body.correo || !req.body.contraseña)
+      // revisa si la petición contiene correo y contraseña en el body y si no lanza error
       throw new Error("Datos erroneos");
+    // Busca un usuario dentro de la base de datos que tenga el mismo correo que se indica en la petición e incluye los datos asociados del Rol
     let usuarioEncontrado = await Usuario.findOne({
       where: { correo: req.body.correo },
       include: [{ model: Rol, as: "rol" }],
     });
+    // Compara los datos leidos de la base de datos con la contraseña de la petición utilizando bcrypt. La contraseña de la base de datos esta encriptada
     const passwordCompare = await passwordHelper.ComparePassword(
       req.body.contraseña,
       usuarioEncontrado?.dataValues.contraseña,
     );
     console.log(passwordCompare);
+    // Valida que el correo sea igual y el resultado de la comparación de contraseñas sea valido
     if (
       usuarioEncontrado?.dataValues.correo == req.body.correo &&
       passwordCompare
     ) {
+      // Genera el token jwt y lo firma con la clave ubicada en el archivo .env. Además le agrega el correo, id y rol al payload
       let token = jwt.sign(
         {
           correo: usuarioEncontrado?.dataValues.correo,
@@ -37,7 +42,6 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
       );
       console.log(token);
       // ENVIA LA COOKIE QUE CADUCA EN 1 HORA
-      // res.status(200).send(token);
       res
         .cookie("token", token, {
           httpOnly: false, // cambiar a true despues
@@ -65,12 +69,14 @@ const register = async function (
 ) {
   try {
     console.log(req.body);
+    // Revisa si la petición contiene correo, contraseña y nombre
     if (!req.body.correo || !req.body.contraseña || !req.body.nombre)
       throw new Error("Datos erroneos");
     // CHEQUEAR SI LA CONTRASEÑA ES SEGURA MINIMO 8 CARACTERES, 1 MAYUSCULA, 1 MINUSCULA, 1 NUMERO CON REGEX
     const passwordRegex = new RegExp(
       "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.{8,})",
     );
+    // Chequea con regex si el mail es válido
     const mailRegex = new RegExp(
       "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+.[a-zA-Z]{2,}$",
     );
@@ -81,8 +87,10 @@ const register = async function (
       throw new Error(
         "La contraseña no cumple con los requisitos (Minimo 8 caracteres, 1 mayuscula, 1 minuscula, 1 número)",
       );
+    // Encripta la contraseña recibida
     let hashedPassword = await passwordHelper.HashPassword(req.body.contraseña);
 
+    // Crea un nuevo usuario en la base de datos y se le asigna el rol por defecto
     await Usuario.create({
       correo: req.body.correo,
       contraseña: hashedPassword,
@@ -97,6 +105,7 @@ const register = async function (
 };
 const logout = (req: Request, res: Response, next: NextFunction) => {
   try {
+    // Manda una respuesta a la web que le dice al navegador que elimine la cookie token
     res
       .clearCookie("token")
       .send({ message: "Cookie eliminada", error: false });
@@ -109,6 +118,7 @@ const logout = (req: Request, res: Response, next: NextFunction) => {
 const checkAuth = async (req: Request, res: Response, next: NextFunction) => {
   try {
     if (!req.cookies.token) throw new Error("Token no enviado");
+    // Utiliza JWT para verificar si el token es válido. Y si es valido envía la información del usuario de vuelta
     jwt.verify(
       req.cookies.token,
       process.env.SECRET ?? "",

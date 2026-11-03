@@ -15,10 +15,10 @@
     rgba(226, 232, 248, 1) 100%
   );
   --animation-time: 0.2s;
-  --bg-color: #8e9dc5;
+  --bg-color: #fff;
   --white-color: #fff;
   --red-color: #ffcccc;
-  --box-color: #f2f3fb;
+  --box-color: #ebedff;
   --text-color: #000007;
   --btn-color: #000000;
   --nav-color: #001f47;
