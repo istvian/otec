@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { LogOut } from "../../Helpers/APIConnector";
 import useIsLogin from "../../Hooks/useIsLogin";
 import { Btn } from "../Btn/Btn";
@@ -18,20 +18,26 @@ export function Nav() {
       }
     });
   }
-  return (
-    <nav className={css.nav}>
-      <img
-        src="/logo.webp"
-        alt="Logo de empresa KeepLearning"
-        className={css.logo}
-      />
-      <div className={css.links}>
-        <Ruta nombre="Negocios" ruta="/negocios" />
-        <Ruta nombre="Catalogo" ruta="/catalogo" />
-      </div>
-      <Btn onClick={HandleLogOut} warning>
-        Cerrar sesión
-      </Btn>
-    </nav>
-  );
+  const rutasExcluidas = ["/login", "/register", ];
+
+  if (!rutasExcluidas.includes(window.location.pathname))
+    return (
+      <nav className={css.nav}>
+        <Link to={"/"}>
+          <img
+            src="/logo.webp"
+            alt="Logo de empresa KeepLearning"
+            className={css.logo}
+          />
+        </Link>
+        <div className={css.links}>
+          <Ruta nombre="Negocios" ruta="/negocios" />
+          <Ruta nombre="Catalogo" ruta="/catalogo" />
+          <Ruta nombre="Empresas" ruta="/empresas" />
+        </div>
+        <Btn onClick={HandleLogOut} warning>
+          Cerrar sesión
+        </Btn>
+      </nav>
+    );
 }
