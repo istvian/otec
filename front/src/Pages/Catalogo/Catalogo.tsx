@@ -8,7 +8,12 @@ import type { Curso } from "../../types/general";
 import { InputText } from "../../Components/InputText/InputText";
 import { InputDate } from "../../Components/InputDate/InputDate";
 import { read, utils } from "xlsx";
-import { CreateCurso, GetCursos } from "../../Helpers/APIConnector";
+import {
+  CreateCurso,
+  DeleteCurso,
+  GetCursos,
+  UpdateCurso,
+} from "../../Helpers/APIConnector";
 
 export function Catalogo() {
   const CURSO_INICIAL: Curso = {
@@ -40,7 +45,6 @@ export function Catalogo() {
   const [isEdit, setIsEdit] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const [archivo, setArchivo] = useState<File | null>(null);
-  console.log("🟢 RENDER - cursos.length =", cursos.length);
   useEffect(() => {
     ReloadData();
   }, []);
@@ -50,11 +54,53 @@ export function Catalogo() {
     const [dia, mes, anio] = fechaStr.split("-").map(Number);
     return new Date(anio, mes - 1, dia); // ✅ Se resta 1 al mes
   }
-  function ReloadData() {
+  async function handleCreate() {
+    await CreateCurso(curso, (res) => {
+      console.log(res);
+      if (!res.error) {
+        console.log("Curso guardado correctamente");
+        window.alert(`Se ha guardado correctamente el curso`);
+      } else {
+        window.alert(`Ha ocurrido un error al ingresar el curso`);
+      }
+    });
+  }
+  async function handleUpdate() {
+    UpdateCurso(curso, (res) => {
+      console.log(res);
+      if (!res.error) {
+        console.log("Curso actualizado correctamente");
+        window.alert(`Se ha actualizado correctamente el curso`);
+      } else {
+        window.alert(`Ha ocurrido un error al actualizar el curso`);
+      }
+    });
+  }
+  async function handleDelete() {
+    if (!curso.codigo) return;
+    await DeleteCurso(curso.codigo, (res) => {
+      console.log(res);
+      if (!res.error) {
+        console.log("Curso eliminado correctamente");
+        window.alert(`Se ha eliminado correctamente el curso`);
+      } else {
+        window.alert(`Ha ocurrido un error al eliminar el curso`);
+      }
+    });
+  }
+  async function ReloadData() {
     console.log("Recargando data");
-    GetCursos((res) => {
+    await GetCursos((res) => {
       if (!res.error && res.cursos) {
-        setCursos(res?.cursos);
+        const cursosMapeados = res.cursos.map((item: any) => ({
+          ...item,
+          evaluacion: new Date(item.evaluacion),
+          ingreso: new Date(item.ingreso),
+          pago: new Date(item.pago),
+          resolucion: new Date(item.resolucion),
+          vigencia: new Date(item.vigencia),
+        }));
+        setCursos(cursosMapeados);
       }
     });
   }
@@ -80,7 +126,7 @@ export function Catalogo() {
       let cursosDataArray: Curso[] = [];
       jsonData.forEach((item: any) => {
         console.log(item);
-        let cursoData: Curso = CURSO_INICIAL;
+        let cursoData: Curso = { ...CURSO_INICIAL };
         delete cursoData.id;
         cursoData.codigo = item["CODIGO CURSO"];
         cursoData.estado = item["ESTADO"];
@@ -110,6 +156,7 @@ export function Catalogo() {
 
       for (let i = 0; i < cursosDataArray.length; i++) {
         await CreateCurso(cursosDataArray[i], (res) => {
+          console.log(res);
           if (!res.error) {
             console.log("Curso guardado correctamente");
             window.alert(
@@ -128,6 +175,8 @@ export function Catalogo() {
     } catch (e) {
       console.error();
       window.alert(e);
+    } finally {
+      await ReloadData();
     }
   };
 
@@ -344,9 +393,12 @@ export function Catalogo() {
             <div className={css.row}>
               {isEdit ? (
                 <Btn
-                  onClick={() => {
+                  onClick={async () => {
+                    if (!confirm("¿Seguro que deseas eliminar este curso?"))
+                      return;
                     setPopup(false);
-                    setCursos((prev) => prev.filter((c) => c.id !== curso.id));
+                    await handleDelete();
+                    await ReloadData();
                   }}
                   warning
                 >
@@ -363,15 +415,14 @@ export function Catalogo() {
                 Cancelar
               </Btn>
               <Btn
-                onClick={() => {
+                onClick={async () => {
                   setPopup(false);
                   if (isEdit) {
-                    setCursos((prev) =>
-                      prev.map((c) => (c.id === curso.id ? curso : c)),
-                    );
+                    await handleUpdate();
                   } else {
-                    setCursos((prev) => [...prev, curso]);
+                    await handleCreate();
                   }
+                  await ReloadData();
                 }}
               >
                 Guardar
@@ -393,7 +444,7 @@ export function Catalogo() {
             onClick={() => {
               setPopup(true);
               setIsEdit(false);
-              setCurso(CURSO_INICIAL);
+              setCurso({ ...CURSO_INICIAL });
             }}
           >
             Agregar curso manualmente
@@ -437,10 +488,9 @@ export function Catalogo() {
               </tr>
             </thead>
             <tbody>
-              {cursos.map((item, index) => {
-                console.log("🟡 MAP item", index, item);
+              {cursos.map((item) => {
                 return (
-                  <tr key={index}>
+                  <tr key={item.codigo}>
                     <td
                       className={css.modificar}
                       onClick={() => {
@@ -460,36 +510,31 @@ export function Catalogo() {
                     <td>{item.nivel}</td>
                     <td>{item.horas}</td>
                     <td>
-                      ${Number(item.valorFranquicia).toLocaleString("es-CL")}
-                    </td>
-                    <td>
                       $
-                      {Number(item.valorEfectivoParticipante).toLocaleString(
+                      {Number(item.valorFranquicia || 0).toLocaleString(
                         "es-CL",
                       )}
                     </td>
                     <td>
                       $
-                      {Number(item.valorImputableParticipante).toLocaleString(
-                        "es-CL",
-                      )}
+                      {Number(
+                        item.valorEfectivoParticipante || 0,
+                      ).toLocaleString("es-CL")}
+                    </td>
+                    <td>
+                      $
+                      {Number(
+                        item.valorImputableParticipante || 0,
+                      ).toLocaleString("es-CL")}
                     </td>
                     <td>{item.numeroResolucionAutorizacion}</td>
                     <td>{item.estado}</td>
                     <td>{item.numeroDeposito}</td>
-                    <td>
-                      {new Date(item.ingreso).toLocaleDateString("es-CL")}
-                    </td>
-                    <td>
-                      {new Date(item.evaluacion).toLocaleDateString("es-CL")}
-                    </td>
-                    <td>
-                      {new Date(item.resolucion).toLocaleDateString("es-CL")}
-                    </td>
-                    <td>
-                      {new Date(item.vigencia).toLocaleDateString("es-CL")}
-                    </td>
-                    <td>{new Date(item.pago).toLocaleDateString("es-CL")}</td>
+                    <td>{item.ingreso.toLocaleDateString("es-CL")}</td>
+                    <td>{item.evaluacion.toLocaleDateString("es-CL")}</td>
+                    <td>{item.resolucion.toLocaleDateString("es-CL")}</td>
+                    <td>{item.vigencia.toLocaleDateString("es-CL")}</td>
+                    <td>{item.pago.toLocaleDateString("es-CL")}</td>
                   </tr>
                 );
               })}

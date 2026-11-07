@@ -7,6 +7,7 @@ import { NotFound } from "./Pages/NotFound/NotFound";
 import { Nav } from "./Components/Nav/Nav";
 import { Catalogo } from "./Pages/Catalogo/Catalogo";
 import { Negocios } from "./Pages/Negocios/Negocios";
+import { Empresas } from "./Pages/Empresas/Empresas";
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
           <Route element={<Main />} path="/" />
           <Route element={<Catalogo />} path="/catalogo" />
           <Route element={<Negocios />} path="/negocios" />
+          <Route element={<Empresas />} path="/empresas" />
           <Route element={<LoginPage />} path="/login" />
           <Route element={<RegisterPage />} path="/register" />
           <Route element={<NotFound />} path="/*" />

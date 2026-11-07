@@ -25,10 +25,16 @@ export interface Curso {
 }
 
 const Curso = sequelize.define("Curso", {
+  id: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    primaryKey: true,
+    autoIncrement: true,
+  },
   codigo: {
     type: DataTypes.STRING,
     allowNull: false,
-    primaryKey: true,
+    unique: true,
   },
   numeroSolicitud: {
     type: DataTypes.STRING,
@@ -106,6 +112,11 @@ const Curso = sequelize.define("Curso", {
     type: DataTypes.BOOLEAN,
     allowNull: false,
     defaultValue: true,
+  },
+  deleted: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: false,
   },
 });
 
