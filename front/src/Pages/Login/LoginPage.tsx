@@ -46,42 +46,46 @@ export function LoginPage() {
             e.preventDefault();
             HandleSubmit();
           }}
-        ></form>
-        <InputText
-          label="Correo"
-          type="email"
-          onChange={(text) => {
-            setLoginData((prev) => ({
-              ...prev,
-              correo: text.toLowerCase().trim(),
-            }));
-          }}
-          placeholder="correo@otec.cl"
-          value={loginData?.correo}
-        />
-        <InputText
-          label="Contraseña"
-          type="password"
-          onChange={(text) => {
-            setLoginData((prev) => ({
-              ...prev,
-              contraseña: text.trim(),
-            }));
-          }}
-          placeholder="Mínimo 8 carácteres, 1 mayuscula, 1 minuscula y 1 número"
-          value={loginData?.contraseña}
-        />
-        {errorMsg != "" ? <p className={css.msg}>{errorMsg}</p> : ""}
-        <Btn
-          onClick={() => {
-            HandleSubmit();
-          }}
-          disabled={
-            loginData.contraseña != "" && loginData.correo != "" ? false : true
-          }
+          style={{width:"100%"}}
         >
-          Iniciar sesión
-        </Btn>
+          <InputText
+            label="Correo"
+            type="email"
+            onChange={(text) => {
+              setLoginData((prev) => ({
+                ...prev,
+                correo: text.toLowerCase().trim(),
+              }));
+            }}
+            placeholder="correo@otec.cl"
+            value={loginData?.correo}
+          />
+          <InputText
+            label="Contraseña"
+            type="password"
+            onChange={(text) => {
+              setLoginData((prev) => ({
+                ...prev,
+                contraseña: text.trim(),
+              }));
+            }}
+            placeholder="Mínimo 8 carácteres, 1 mayuscula, 1 minuscula y 1 número"
+            value={loginData?.contraseña}
+          />
+          {errorMsg != "" ? <p className={css.msg}>{errorMsg}</p> : ""}
+          <Btn
+            onClick={() => {
+              HandleSubmit();
+            }}
+            disabled={
+              loginData.contraseña != "" && loginData.correo != ""
+                ? false
+                : true
+            }
+          >
+            Iniciar sesión
+          </Btn>
+        </form>
         <Link className={css.link} to={"/register"}>
           O quizás quieras crear una cuenta
         </Link>

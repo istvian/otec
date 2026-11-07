@@ -117,8 +117,8 @@ const logout = (req: Request, res: Response, next: NextFunction) => {
 
 const checkAuth = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    if (!req.cookies.token) throw new Error("Token no enviado");
-    // Utiliza JWT para verificar si el token es válido. Y si es valido envía la información del usuario de vuelta
+    if (!req.cookies.token)
+      res.send({ message: "Usuario no logueado", error: true });
     jwt.verify(
       req.cookies.token,
       process.env.SECRET ?? "",

@@ -13,6 +13,7 @@ const port = process.env.PORT;
 
 import indexRouter from "./routes/index.ts";
 import userRouter from "./routes/user.ts";
+import cursoRouter from "./routes/curso.ts";
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -38,11 +39,13 @@ app.use(cookieParser());
 app.use(express.static(path.join(process.cwd(), "public")));
 
 console.log("Sincronizando DB");
-sequelize.sync({ logging: false });
-setupDB.LoadRoles();
+sequelize.sync({ logging: false }).then(() => {
+  setupDB.LoadRoles();
+});
 
 app.use("/", indexRouter);
 app.use("/api/user", userRouter);
+app.use("/api/curso", cursoRouter);
 
 app.listen(port, () => {
   console.log("Escuchando en el puerto " + port);

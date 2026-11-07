@@ -15,7 +15,7 @@ export interface Response {
 }
 
 export interface Curso {
-  id: string;
+  id?: string;
   codigo: string;
   numeroSolicitud: string;
   nombre: string;
@@ -36,4 +36,8 @@ export interface Curso {
   vigencia: Date;
   pago: Date;
   activo: boolean;
+}
+
+export interface CursosResponse extends Response {
+  cursos?: Curso[];
 }
