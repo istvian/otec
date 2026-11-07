@@ -1,4 +1,4 @@
-import { useRef, useState, type ChangeEvent } from "react";
+import { useEffect, useRef, useState, type ChangeEvent } from "react";
 import { Box } from "../../Components/Box/Box";
 import { Btn } from "../../Components/Btn/Btn";
 import { Frame } from "../../Components/Frame/Frame";
@@ -8,6 +8,7 @@ import type { Curso } from "../../types/general";
 import { InputText } from "../../Components/InputText/InputText";
 import { InputDate } from "../../Components/InputDate/InputDate";
 import { read, utils } from "xlsx";
+import { CreateCurso, GetCursos } from "../../Helpers/APIConnector";
 
 export function Catalogo() {
   const CURSO_INICIAL: Curso = {
@@ -33,16 +34,29 @@ export function Catalogo() {
     numeroDeposito: 0,
     activo: true,
   };
-  const [curso, setCurso] = useState<Curso>(CURSO_INICIAL);
+  const [curso, setCurso] = useState<Curso>({ ...CURSO_INICIAL });
   const [cursos, setCursos] = useState<Curso[]>([]);
   const [popup, setPopup] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const [archivo, setArchivo] = useState<File | null>(null);
+  console.log("🟢 RENDER - cursos.length =", cursos.length);
+  useEffect(() => {
+    ReloadData();
+  }, []);
 
-  function stringToDate(fechaStr: string) {
+  function stringToDate(fechaStr: string): Date {
+    if (!fechaStr) return new Date();
     const [dia, mes, anio] = fechaStr.split("-").map(Number);
-    return new Date(anio, mes - 1, dia);
+    return new Date(anio, mes - 1, dia); // ✅ Se resta 1 al mes
+  }
+  function ReloadData() {
+    console.log("Recargando data");
+    GetCursos((res) => {
+      if (!res.error && res.cursos) {
+        setCursos(res?.cursos);
+      }
+    });
   }
 
   const handleChange = async (
@@ -63,9 +77,11 @@ export function Catalogo() {
         );
       }
       console.log("Datos del Excel:", jsonData);
+      let cursosDataArray: Curso[] = [];
       jsonData.forEach((item: any) => {
         console.log(item);
         let cursoData: Curso = CURSO_INICIAL;
+        delete cursoData.id;
         cursoData.codigo = item["CODIGO CURSO"];
         cursoData.estado = item["ESTADO"];
         cursoData.evaluacion = stringToDate(item["FECHA EVALUACION"]);
@@ -88,8 +104,25 @@ export function Catalogo() {
         cursoData.valorFranquicia = item["VALOR FRANQUICIA"];
         cursoData.valorImputableParticipante =
           item["VALOR IMPUTABLE PARTICIPANTE"];
-        setCursos((prev) => [...prev, cursoData]);
+        cursosDataArray.push(cursoData);
+        // setCursos((prev) => [...prev, cursoData]);
       });
+
+      for (let i = 0; i < cursosDataArray.length; i++) {
+        await CreateCurso(cursosDataArray[i], (res) => {
+          if (!res.error) {
+            console.log("Curso guardado correctamente");
+            window.alert(
+              `Se ha guardado correctamente el curso ${i + 1}/${cursosDataArray.length}`,
+            );
+          } else {
+            window.alert(
+              `Ha ocurrido un error al ingresar el curso ${i + 1}/${cursosDataArray.length}`,
+            );
+          }
+        });
+      }
+
       // cursoData.codigo = jsonData[0];
       e.target.value = "";
     } catch (e) {
@@ -405,6 +438,7 @@ export function Catalogo() {
             </thead>
             <tbody>
               {cursos.map((item, index) => {
+                console.log("🟡 MAP item", index, item);
                 return (
                   <tr key={index}>
                     <td
@@ -443,11 +477,19 @@ export function Catalogo() {
                     <td>{item.numeroResolucionAutorizacion}</td>
                     <td>{item.estado}</td>
                     <td>{item.numeroDeposito}</td>
-                    <td>{item.ingreso.toLocaleDateString("es-CL")}</td>
-                    <td>{item.evaluacion.toLocaleDateString("es-CL")}</td>
-                    <td>{item.resolucion.toLocaleDateString("es-CL")}</td>
-                    <td>{item.vigencia.toLocaleDateString("es-CL")}</td>
-                    <td>{item.pago.toLocaleDateString("es-CL")}</td>
+                    <td>
+                      {new Date(item.ingreso).toLocaleDateString("es-CL")}
+                    </td>
+                    <td>
+                      {new Date(item.evaluacion).toLocaleDateString("es-CL")}
+                    </td>
+                    <td>
+                      {new Date(item.resolucion).toLocaleDateString("es-CL")}
+                    </td>
+                    <td>
+                      {new Date(item.vigencia).toLocaleDateString("es-CL")}
+                    </td>
+                    <td>{new Date(item.pago).toLocaleDateString("es-CL")}</td>
                   </tr>
                 );
               })}

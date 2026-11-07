@@ -1,5 +1,11 @@
 import axios from "axios";
-import type { LoginData, RegisterData, Response } from "../types/general";
+import type {
+  Curso,
+  CursosResponse,
+  LoginData,
+  RegisterData,
+  Response,
+} from "../types/general";
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 
@@ -59,5 +65,77 @@ export async function LogOut(): Promise<Response | null> {
   } catch (e) {
     console.error(e);
     return null;
+  }
+}
+
+// ================= CRUD CURSO =================
+
+export async function CreateCurso(
+  formData: Curso,
+  onEnd: (response: CursosResponse) => void,
+) {
+  try {
+    console.log("Petición POST:" + BASE_URL + "/api/curso");
+    console.log("Data");
+    console.log(formData);
+    const response = await api.post("/api/curso", formData);
+    console.log(response.data);
+    if (onEnd) onEnd(response.data);
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+export async function GetCursos(onEnd: (response: CursosResponse) => void) {
+  try {
+    console.log("Petición GET:" + BASE_URL + "/api/curso");
+    const response = await api.get("/api/curso");
+    console.log(response.data);
+    if (onEnd) onEnd(response.data as CursosResponse);
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+export async function GetCursoById(
+  id: string,
+  onEnd: (response: CursosResponse) => void,
+) {
+  try {
+    console.log("Petición GET:" + BASE_URL + "/api/curso/" + id);
+    const response = await api.get("/api/curso/" + id);
+    console.log(response.data);
+    if (onEnd) onEnd(response.data as CursosResponse);
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+export async function UpdateCurso(
+  curso: Curso,
+  onEnd: (response: Response) => void,
+) {
+  try {
+    console.log("Petición PUT:" + BASE_URL + "/api/curso/" + curso.id);
+    console.log("Data");
+    const response = await api.put("/api/curso/" + curso.id, curso);
+    console.log(response.data);
+    if (onEnd) onEnd(response.data);
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+export async function DeleteCurso(
+  id: string,
+  onEnd: (response: Response) => void,
+) {
+  try {
+    console.log("Petición DELETE:" + BASE_URL + "/api/curso/" + id);
+    const response = await api.delete("/api/curso/" + id);
+    console.log(response.data);
+    if (onEnd) onEnd(response.data);
+  } catch (e) {
+    console.error(e);
   }
 }

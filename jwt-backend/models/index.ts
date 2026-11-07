@@ -1,5 +1,6 @@
 import sequelize from "../config/database";
 import Rol from "./Rol";
+import Curso from "./Curso";
 import Usuario from "./Usuario";
 
 // RELACIONES
@@ -15,4 +16,4 @@ Usuario.belongsTo(Rol, {
 });
 
 
-export { sequelize, Usuario, Rol };
+export { sequelize, Usuario, Rol, Curso };
