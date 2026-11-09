@@ -116,9 +116,9 @@ export async function UpdateCurso(
   onEnd: (response: Response) => void,
 ) {
   try {
-    console.log("Petición PATH:" + BASE_URL + "/api/curso/" + curso.codigo);
+    console.log("Petición PATH:" + BASE_URL + "/api/curso/" + curso.id);
     console.log("Data");
-    const response = await api.patch("/api/curso/" + curso.codigo, curso);
+    const response = await api.patch("/api/curso/" + curso.id, curso);
     console.log(response.data);
     if (onEnd) onEnd(response.data);
   } catch (e) {

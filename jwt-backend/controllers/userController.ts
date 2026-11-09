@@ -117,8 +117,10 @@ const logout = (req: Request, res: Response, next: NextFunction) => {
 
 const checkAuth = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    if (!req.cookies.token)
+    if (!req.cookies.token) {
       res.send({ message: "Usuario no logueado", error: true });
+      return;
+    }
     jwt.verify(
       req.cookies.token,
       process.env.SECRET ?? "",
