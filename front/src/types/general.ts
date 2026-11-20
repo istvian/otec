@@ -9,9 +9,10 @@ export interface RegisterData {
   nombre: string;
 }
 
-export interface Response {
-  message: string;
+export interface ResponseBase<T = null> {
+  mensaje: string;
   error: boolean;
+  data?: T | null;
 }
 
 export interface Curso {
@@ -38,6 +39,16 @@ export interface Curso {
   activo: boolean;
 }
 
-export interface CursosResponse extends Response {
-  cursos?: Curso[];
+export interface Empresa {
+  id?: number;
+  rut: string;
+  razon: string;
+  direccion: string;
+  contactos: Contacto[];
+}
+export interface Contacto {
+  nombre: string;
+  cargo: string;
+  telefono: string;
+  correo: string;
 }

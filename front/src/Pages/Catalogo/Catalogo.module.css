@@ -5,6 +5,13 @@
   justify-content: center;
   width: 100%;
 }
+.btns {
+  display: flex;
+  flex-flow: row wrap;
+  align-items: flex-end;
+  justify-content: flex-end;
+  width: 100%;
+}
 .actions {
   display: flex;
   flex-flow: row wrap;
@@ -12,25 +19,10 @@
   justify-content: center;
 }
 .actions > button,
-.row > button {
+.btns > button {
   margin: 1rem;
 }
-table {
-  width: 100%;
-  /* border: black 1px solid; */
-  border-collapse: collapse;
-}
-thead {
-  background-color: var(--input-color);
-}
-th,
-td {
-  padding: 0.5rem;
-  border: black 1px solid;
-  width: fit-content;
-  font-size: 0.9rem;
-  white-space: nowrap;
-}
+
 .tableContainer {
   width: 100%;
   display: flex;
@@ -83,8 +75,28 @@ td {
 .form {
   display: grid;
   justify-content: center;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 450px));
+  align-items: center;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 300px));
   gap: 0rem 1rem;
   margin-top: 1rem;
   width: 100%;
+}
+.alerta {
+  background-color: rgb(255, 158, 158);
+}
+.textAlert > i {
+  margin: 0.5rem;
+  color: rgb(255, 0, 0);
+  font-size: 1.5rem;
+}
+.textOk > i {
+  margin: 0.5rem;
+  color: rgb(0, 213, 255);
+  font-size: 1.5rem;
+}
+.box {
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+  justify-content: center;
 }

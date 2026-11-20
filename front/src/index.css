@@ -50,7 +50,22 @@
   --primary-color: #4d27d7;
   --transparent-color: #00000050;
 } */
-
+table {
+  width: 100%;
+  /* border: black 1px solid; */
+  border-collapse: collapse;
+}
+thead {
+  background-color: var(--input-color);
+}
+th,
+td {
+  padding: 0.5rem;
+  border: black 1px solid;
+  width: fit-content;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
 * {
   box-sizing: border-box;
 }
@@ -67,7 +82,6 @@ body {
   margin: 0;
   padding: 0;
 }
-
 
 * {
   -webkit-tap-highlight-color: transparent;

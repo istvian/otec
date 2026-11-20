@@ -14,6 +14,7 @@ const port = process.env.PORT;
 import indexRouter from "./routes/index.ts";
 import userRouter from "./routes/user.ts";
 import cursoRouter from "./routes/curso.ts";
+import empresaRouter from "./routes/empresa.ts";
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -46,6 +47,7 @@ sequelize.sync({ logging: false }).then(() => {
 app.use("/", indexRouter);
 app.use("/api/user", userRouter);
 app.use("/api/curso", cursoRouter);
+app.use("/api/empresa", empresaRouter);
 
 app.listen(port, () => {
   console.log("Escuchando en el puerto " + port);

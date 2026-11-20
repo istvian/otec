@@ -1,0 +1,13 @@
+.btn {
+  background-color: var(--btn-color);
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+  &:hover {
+    opacity: 0.8;
+  }
+  &:active {
+    transform: scale(0.9);
+  }
+}

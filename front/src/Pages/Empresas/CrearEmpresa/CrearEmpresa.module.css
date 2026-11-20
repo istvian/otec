@@ -1,0 +1,41 @@
+.form {
+  display: grid;
+  justify-content: flex-start;
+  align-items: flex-end;
+  grid-template-columns: 1fr 3fr 2fr 1fr;
+  gap: 0rem 1rem;
+  margin-top: 1rem;
+  width: 100%;
+}
+.tableContainer {
+  width: 100%;
+  display: flex;
+  flex-flow: row wrap;
+  align-items: flex-start;
+  justify-content: flex-start;
+  overflow: auto;
+}
+.btns {
+  display: flex;
+  flex-flow: row wrap;
+  align-items: center;
+  justify-content: flex-end;
+  width: 100%;
+}
+.btns > * {
+  margin: 1rem;
+}
+
+@media screen and (max-width: 1000px) {
+  .form {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+@media screen and (max-width: 600px) {
+  .form {
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: center;
+    justify-content: center;
+  }
+}

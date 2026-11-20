@@ -5,12 +5,13 @@ import Curso from "../models/Curso";
 async function crearCurso(req: Request, res: Response): Promise<void> {
   try {
     console.log(req.body);
-    const curso = await Curso.create(req.body);
+    await Curso.create(req.body);
     res.send({
       message: "Curso creado exitosamente",
-      curso,
+      error: false,
     });
   } catch (error: any) {
+    console.error(error);
     res.send({
       message: "Error al crear el curso",
       error: true,
@@ -25,12 +26,13 @@ async function obtenerCursos(req: Request, res: Response): Promise<void> {
     res.send({
       message: "Cursos enviados correctamente",
       error: false,
-      cursos: cursos,
+      data: cursos,
     });
   } catch (error: any) {
+    console.error(error);
     res.send({
       message: "Error al obtener los cursos",
-      error: error.message,
+      error: true,
     });
   }
 }
@@ -42,15 +44,16 @@ async function obtenerCursoPorId(req: Request, res: Response): Promise<void> {
     const curso = await Curso.findByPk(id);
 
     if (!curso) {
-      res.status(404).json({ message: "Curso no encontrado" });
+      res.status(404).json({ message: "Curso no encontrado", error: true });
       return;
     }
 
-    res.send(curso);
+    res.send({ data: curso, error: false, message: "Enviado por ID" });
   } catch (error: any) {
+    console.error(error);
     res.send({
       message: "Error al obtener el curso",
-      error: error.message,
+      error: true,
     });
   }
 }
@@ -63,7 +66,7 @@ async function actualizarCurso(req: Request, res: Response): Promise<void> {
     const curso = await Curso.findByPk(id);
 
     if (!curso) {
-      res.status(404).send({ message: "Curso no encontrado" });
+      res.status(404).send({ message: "Curso no encontrado", error: true });
       return;
     }
 
@@ -71,12 +74,13 @@ async function actualizarCurso(req: Request, res: Response): Promise<void> {
 
     res.send({
       message: "Curso actualizado exitosamente",
-      curso,
+      error: false,
     });
   } catch (error: any) {
+    console.error(error);
     res.send({
       message: "Error al actualizar el curso",
-      error: error.message,
+      error: true,
     });
   }
 }
@@ -88,7 +92,7 @@ async function eliminarCurso(req: Request, res: Response): Promise<void> {
     const curso = await Curso.findByPk(id);
 
     if (!curso) {
-      res.send({ message: "Curso no encontrado" });
+      res.send({ message: "Curso no encontrado", error: true });
       return;
     }
 
@@ -96,12 +100,13 @@ async function eliminarCurso(req: Request, res: Response): Promise<void> {
 
     res.send({
       message: "Curso marcado como inactivo (eliminación lógica) exitosamente",
-      curso,
+      error: false,
     });
   } catch (error: any) {
+    console.error(error);
     res.send({
       message: "Error al eliminar (desactivar) el curso",
-      error: error.message,
+      error: true,
     });
   }
 }

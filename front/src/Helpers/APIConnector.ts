@@ -1,10 +1,10 @@
 import axios from "axios";
 import type {
   Curso,
-  CursosResponse,
+  Empresa,
   LoginData,
   RegisterData,
-  Response,
+  ResponseBase,
 } from "../types/general";
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
@@ -18,7 +18,7 @@ const api = axios.create({
 
 export async function Login(
   formData: LoginData,
-  onEnd: (response: Response) => void,
+  onEnd: (response: ResponseBase) => void,
 ) {
   try {
     console.log("Petición POST:" + BASE_URL + "/api/user/login");
@@ -32,7 +32,7 @@ export async function Login(
 
 export async function Register(
   formData: RegisterData,
-  onEnd: (response: Response) => void,
+  onEnd: (response: ResponseBase) => void,
 ) {
   try {
     console.log("Petición POST:" + BASE_URL + "/api/user/register");
@@ -45,7 +45,7 @@ export async function Register(
     console.error(e);
   }
 }
-export async function CheckAuth(): Promise<Response | null> {
+export async function CheckAuth(): Promise<ResponseBase | null> {
   try {
     console.log("Petición GET:" + BASE_URL + "/api/user/check");
     const response = await api.get("/api/user/check");
@@ -56,7 +56,7 @@ export async function CheckAuth(): Promise<Response | null> {
     return null;
   }
 }
-export async function LogOut(): Promise<Response | null> {
+export async function LogOut(): Promise<ResponseBase | null> {
   try {
     console.log("Petición GET:" + BASE_URL + "/api/user/logout");
     const response = await api.get("/api/user/logout");
@@ -72,7 +72,7 @@ export async function LogOut(): Promise<Response | null> {
 
 export async function CreateCurso(
   formData: Curso,
-  onEnd: (response: CursosResponse) => void,
+  onEnd: (response: ResponseBase) => void,
 ) {
   try {
     console.log("Petición POST:" + BASE_URL + "/api/curso");
@@ -86,12 +86,14 @@ export async function CreateCurso(
   }
 }
 
-export async function GetCursos(onEnd: (response: CursosResponse) => void) {
+export async function GetCursos(
+  onEnd: (response: ResponseBase<Curso[]>) => void,
+) {
   try {
     console.log("Petición GET:" + BASE_URL + "/api/curso");
     const response = await api.get("/api/curso");
     console.log(response.data);
-    if (onEnd) onEnd(response.data as CursosResponse);
+    if (onEnd) onEnd(response.data as ResponseBase<Curso[]>);
   } catch (e) {
     console.error(e);
   }
@@ -99,13 +101,13 @@ export async function GetCursos(onEnd: (response: CursosResponse) => void) {
 
 export async function GetCursoById(
   id: string,
-  onEnd: (response: CursosResponse) => void,
+  onEnd: (response: ResponseBase) => void,
 ) {
   try {
     console.log("Petición GET:" + BASE_URL + "/api/curso/" + id);
     const response = await api.get("/api/curso/" + id);
     console.log(response.data);
-    if (onEnd) onEnd(response.data as CursosResponse);
+    if (onEnd) onEnd(response.data as ResponseBase);
   } catch (e) {
     console.error(e);
   }
@@ -113,12 +115,12 @@ export async function GetCursoById(
 
 export async function UpdateCurso(
   curso: Curso,
-  onEnd: (response: Response) => void,
+  onEnd: (response: ResponseBase) => void,
 ) {
   try {
-    console.log("Petición PATH:" + BASE_URL + "/api/curso/" + curso.codigo);
+    console.log("Petición PATH:" + BASE_URL + "/api/curso/" + curso.id);
     console.log("Data");
-    const response = await api.patch("/api/curso/" + curso.codigo, curso);
+    const response = await api.patch("/api/curso/" + curso.id, curso);
     console.log(response.data);
     if (onEnd) onEnd(response.data);
   } catch (e) {
@@ -128,11 +130,84 @@ export async function UpdateCurso(
 
 export async function DeleteCurso(
   id: string,
-  onEnd: (response: Response) => void,
+  onEnd: (response: ResponseBase) => void,
 ) {
   try {
     console.log("Petición DELETE:" + BASE_URL + "/api/curso/" + id);
     const response = await api.delete("/api/curso/" + id);
+    console.log(response.data);
+    if (onEnd) onEnd(response.data);
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+// ================= CRUD EMPRESAS =================
+
+export async function CreateEmpresa(
+  formData: Empresa,
+  onEnd: (response: ResponseBase) => void,
+) {
+  try {
+    console.log("Petición POST:" + BASE_URL + "/api/empresa");
+    console.log("Data");
+    console.log(formData);
+    const response = await api.post("/api/empresa", formData);
+    console.log(response.data);
+    if (onEnd) onEnd(response.data);
+  } catch (e) {
+    console.error(e);
+  }
+}
+export async function GetEmpresas(
+  onEnd: (response: ResponseBase<Empresa[]>) => void,
+) {
+  try {
+    console.log("Petición GET:" + BASE_URL + "/api/empresa");
+    const response = await api.get("/api/empresa");
+    console.log(response.data);
+    if (onEnd) onEnd(response.data as ResponseBase<Empresa[]>);
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+export async function GetEmpresaByID(
+  id: string,
+  onEnd: (response: ResponseBase<Empresa>) => void,
+) {
+  try {
+    console.log("Petición GET:" + BASE_URL + "/api/empresa/" + id);
+    const response = await api.get("/api/empresa/" + id);
+    console.log(response.data);
+    if (onEnd) onEnd(response.data as ResponseBase<Empresa>);
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+export async function UpdateEmpresa(
+  empresa: Empresa,
+  onEnd: (response: ResponseBase) => void,
+) {
+  try {
+    console.log("Petición PATH:" + BASE_URL + "/api/empresa/" + empresa.id);
+    console.log("Data");
+    const response = await api.patch("/api/empresa/" + empresa.id, empresa);
+    console.log(response.data);
+    if (onEnd) onEnd(response.data);
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+export async function DeleteEmpresa(
+  id: string,
+  onEnd: (response: ResponseBase) => void,
+) {
+  try {
+    console.log("Petición DELETE:" + BASE_URL + "/api/empresa/" + id);
+    const response = await api.delete("/api/empresa/" + id);
     console.log(response.data);
     if (onEnd) onEnd(response.data);
   } catch (e) {
