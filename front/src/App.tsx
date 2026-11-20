@@ -20,7 +20,7 @@ function App() {
           <Route element={<Catalogo />} path="/catalogo" />
           <Route element={<Negocios />} path="/negocios" />
           <Route element={<Empresas />} path="/empresas" />
-          <Route element={<CrearEmpresa />} path="/empresas/crear" />
+          <Route element={<CrearEmpresa />} path="/empresas/crear/:id?" />
           <Route element={<LoginPage />} path="/login" />
           <Route element={<RegisterPage />} path="/register" />
           <Route element={<NotFound />} path="/*" />

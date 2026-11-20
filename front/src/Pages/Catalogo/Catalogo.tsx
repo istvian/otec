@@ -97,8 +97,8 @@ export function Catalogo() {
   async function ReloadData() {
     console.log("Recargando data");
     await GetCursos((res) => {
-      if (!res.error && res.cursos) {
-        const cursosMapeados = res.cursos.map((item: any) => ({
+      if (!res.error && res.data) {
+        const cursosMapeados = res.data.map((item) => ({
           ...item,
           evaluacion: new Date(item.evaluacion),
           ingreso: new Date(item.ingreso),

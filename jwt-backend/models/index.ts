@@ -2,6 +2,8 @@ import sequelize from "../config/database";
 import Rol from "./Rol";
 import Curso from "./Curso";
 import Usuario from "./Usuario";
+import Contacto from "./Contacto";
+import Empresa from "./Empresa";
 
 // RELACIONES
 
@@ -15,5 +17,14 @@ Usuario.belongsTo(Rol, {
   as: "rol",
 });
 
+Empresa.hasMany(Contacto, {
+  foreignKey: "empresaID",
+  as: "contactos",
+});
 
-export { sequelize, Usuario, Rol, Curso };
+Contacto.belongsTo(Empresa, {
+  foreignKey: "empresaID",
+  as: "empresa",
+});
+
+export { sequelize, Usuario, Rol, Curso, Contacto, Empresa };

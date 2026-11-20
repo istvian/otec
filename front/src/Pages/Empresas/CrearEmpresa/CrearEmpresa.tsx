@@ -1,12 +1,18 @@
-import { Link, useNavigate, useRoutes } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { Box } from "../../../Components/Box/Box";
 import { Frame } from "../../../Components/Frame/Frame";
 import { Title } from "../../../Components/Title/Title";
 import css from "./CrearEmpresa.module.css";
 import { InputText } from "../../../Components/InputText/InputText";
 import type { Empresa } from "../../../types/general";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Btn } from "../../../Components/Btn/Btn";
+import {
+  CreateEmpresa,
+  GetEmpresaByID,
+  UpdateEmpresa,
+} from "../../../Helpers/APIConnector";
+import { CellBtn } from "../../../Components/CellBtn/CellBtn";
 
 export function CrearEmpresa() {
   const BASE_EMPRESA: Empresa = {
@@ -17,11 +23,28 @@ export function CrearEmpresa() {
   };
   const [empresa, setEmpresa] = useState<Empresa>({ ...BASE_EMPRESA });
   const nav = useNavigate();
+  const { id } = useParams();
+  console.log(id);
+
+  useEffect(() => {
+    if (id) {
+      GetEmpresaByID(id, (res) => {
+        console.log(res);
+        if (res && res.data) {
+          console.log(res.mensaje);
+          setEmpresa(res.data);
+        }
+      });
+    }
+  }, [id]);
 
   const agregarContacto = () => {
     setEmpresa((prev) => ({
       ...prev,
-      contactos: [...prev.contactos, { nombre: "", correo: "", telefono: "" }],
+      contactos: [
+        ...prev.contactos,
+        { nombre: "", correo: "", telefono: "", cargo: "" },
+      ],
     }));
   };
 
@@ -40,11 +63,31 @@ export function CrearEmpresa() {
       contactos: prev.contactos.filter((_, i) => i !== index),
     }));
   };
+
+  const handleGuardar = async () => {
+    // Validaciones varias
+    if (id) {
+      UpdateEmpresa(empresa, (res) => {
+        if (res && res.mensaje) {
+          console.log(res.mensaje);
+          alert(res.mensaje);
+        }
+      });
+    } else {
+      CreateEmpresa(empresa, (res) => {
+        if (res && res.mensaje) {
+          console.log(res.mensaje);
+          alert(res.mensaje);
+        }
+      });
+    }
+  };
   return (
     <Frame>
       <Box>
         <Title>
-          <Link to="/empresas">Empresas</Link> {">"} Crear empresa
+          <Link to="/empresas">Empresas</Link> {">"}{" "}
+          {id ? "Modificar" : "Crear"} empresa
         </Title>
       </Box>
       <Box>
@@ -91,21 +134,20 @@ export function CrearEmpresa() {
                 <th>Nombre</th>
                 <th>Teléfono</th>
                 <th>Correo</th>
+                <th>Cargo</th>
               </tr>
             </thead>
             <tbody>
               {empresa.contactos.map((item, index) => {
                 return (
                   <tr key={index}>
-                    <td>
-                      <Btn
-                        onClick={() => {
-                          quitarContacto(index);
-                        }}
-                      >
-                        Quitar
-                      </Btn>
-                    </td>
+                    <CellBtn
+                      onClick={() => {
+                        quitarContacto(index);
+                      }}
+                    >
+                      Quitar
+                    </CellBtn>
                     <td>
                       {
                         <InputText
@@ -144,6 +186,18 @@ export function CrearEmpresa() {
                         />
                       }
                     </td>
+                    <td>
+                      {
+                        <InputText
+                          label="Cargo del contacto"
+                          onChange={(text) => {
+                            actualizarContacto(index, "cargo", text);
+                          }}
+                          placeholder="Cargo del contacto"
+                          value={item.cargo}
+                        />
+                      }
+                    </td>
                   </tr>
                 );
               })}
@@ -165,7 +219,7 @@ export function CrearEmpresa() {
           >
             Cancelar
           </Btn>
-          <Btn onClick={() => {}}>Guardar empresa</Btn>
+          <Btn onClick={handleGuardar}>Guardar empresa</Btn>
         </div>
       </Box>
     </Frame>

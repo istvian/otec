@@ -1,18 +1,15 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../config/database";
+import { ContactoType } from "./Contacto";
 
-export interface Empresa {
+export interface EmpresaType {
   rut: string;
   razon: string;
-  contactos: Contacto[];
-}
-export interface Contacto {
-  nombre: string;
-  telefono: string;
-  correo: string;
+  direccion: string;
+  contactos: ContactoType[];
 }
 
-const Curso = sequelize.define("Curso", {
+const Empresa = sequelize.define("Empresa", {
   id: {
     type: DataTypes.INTEGER,
     allowNull: false,
@@ -28,10 +25,15 @@ const Curso = sequelize.define("Curso", {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  contactos: {
-    type: DataTypes.ARRAY,
+  direccion: {
+    type: DataTypes.STRING,
     allowNull: false,
+  },
+  deleted: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: false,
   },
 });
 
-export default Curso;
+export default Empresa;
