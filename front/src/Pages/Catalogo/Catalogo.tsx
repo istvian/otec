@@ -406,44 +406,44 @@ export function Catalogo() {
                 }}
               />
             </div>
-            <div className={css.row}>
-              {isEdit ? (
-                <Btn
-                  onClick={async () => {
-                    if (!confirm("¿Seguro que deseas eliminar este curso?"))
-                      return;
-                    setPopup(false);
-                    await handleDelete();
-                    await ReloadData();
-                  }}
-                  warning
-                >
-                  Eliminar
-                </Btn>
-              ) : (
-                ""
-              )}
-              <Btn
-                onClick={() => {
-                  setPopup(false);
-                }}
-              >
-                Cancelar
-              </Btn>
+          </div>
+          <div className={css.btns}>
+            {isEdit ? (
               <Btn
                 onClick={async () => {
+                  if (!confirm("¿Seguro que deseas eliminar este curso?"))
+                    return;
                   setPopup(false);
-                  if (isEdit) {
-                    await handleUpdate();
-                  } else {
-                    await handleCreate();
-                  }
+                  await handleDelete();
                   await ReloadData();
                 }}
+                warning
               >
-                Guardar
+                Eliminar
               </Btn>
-            </div>
+            ) : (
+              ""
+            )}
+            <Btn
+              onClick={() => {
+                setPopup(false);
+              }}
+            >
+              Cancelar
+            </Btn>
+            <Btn
+              onClick={async () => {
+                setPopup(false);
+                if (isEdit) {
+                  await handleUpdate();
+                } else {
+                  await handleCreate();
+                }
+                await ReloadData();
+              }}
+            >
+              Guardar
+            </Btn>
           </div>
         </div>
       </div>

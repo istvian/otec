@@ -41,3 +41,15 @@ export interface Curso {
 export interface CursosResponse extends Response {
   cursos?: Curso[];
 }
+
+export interface Empresa {
+  rut: string;
+  razon: string;
+  direccion: string;
+  contactos: Contacto[];
+}
+export interface Contacto {
+  nombre: string;
+  telefono: string;
+  correo: string;
+}

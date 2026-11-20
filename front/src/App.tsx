@@ -8,6 +8,7 @@ import { Nav } from "./Components/Nav/Nav";
 import { Catalogo } from "./Pages/Catalogo/Catalogo";
 import { Negocios } from "./Pages/Negocios/Negocios";
 import { Empresas } from "./Pages/Empresas/Empresas";
+import { CrearEmpresa } from "./Pages/Empresas/CrearEmpresa/CrearEmpresa";
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
           <Route element={<Catalogo />} path="/catalogo" />
           <Route element={<Negocios />} path="/negocios" />
           <Route element={<Empresas />} path="/empresas" />
+          <Route element={<CrearEmpresa />} path="/empresas/crear" />
           <Route element={<LoginPage />} path="/login" />
           <Route element={<RegisterPage />} path="/register" />
           <Route element={<NotFound />} path="/*" />
