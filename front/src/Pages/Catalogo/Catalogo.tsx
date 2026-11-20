@@ -1,4 +1,10 @@
-import { useEffect, useRef, useState, type ChangeEvent } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type ChangeEvent,
+  type ReactNode,
+} from "react";
 import { Box } from "../../Components/Box/Box";
 import { Btn } from "../../Components/Btn/Btn";
 import { Frame } from "../../Components/Frame/Frame";
@@ -184,6 +190,16 @@ export function Catalogo() {
     inputRef.current?.click();
   };
 
+  function countExpiringCourses(): ReactNode {
+    return cursos?.filter((item) => {
+      let fechaActual = new Date();
+      let fechaAlerta = new Date(item.vigencia);
+      fechaAlerta.setDate(fechaAlerta.getDate() - 60);
+      if (fechaActual >= fechaAlerta) {
+        return item;
+      }
+    }).length;
+  }
   return (
     <Frame>
       <div className={css.popup} style={{ display: popup ? "flex" : "none" }}>
@@ -460,6 +476,23 @@ export function Catalogo() {
         </div>
       </Box>
       <Box>
+        {countExpiringCourses() == 0 ? (
+          <div className={css.box}>
+            <p className={css.textOk}>
+              <i className="fa-solid fa-square-check"></i>
+              Sin alertas
+            </p>
+          </div>
+        ) : (
+          <div className={css.box}>
+            <p className={css.textAlert}>
+              <i className="fa-solid fa-triangle-exclamation"></i>
+              {countExpiringCourses()} cursos por vencer en 60 días{" "}
+            </p>
+          </div>
+        )}
+      </Box>
+      <Box>
         <Title>Lista de cursos</Title>
         <div className={css.tableContainer}>
           <table>
@@ -489,8 +522,16 @@ export function Catalogo() {
             </thead>
             <tbody>
               {cursos.map((item) => {
+                function handleSemaforo() {
+                  let fechaActual = new Date();
+                  let fechaAlerta = new Date(item.vigencia);
+                  fechaAlerta.setDate(fechaAlerta.getDate() - 60);
+                  if (fechaActual >= fechaAlerta) {
+                    return css.alerta;
+                  }
+                }
                 return (
-                  <tr key={item.codigo}>
+                  <tr key={item.codigo} className={handleSemaforo()}>
                     <td
                       className={css.modificar}
                       onClick={() => {

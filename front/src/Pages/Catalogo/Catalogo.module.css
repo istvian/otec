@@ -88,3 +88,22 @@ td {
   margin-top: 1rem;
   width: 100%;
 }
+.alerta {
+  background-color: rgb(255, 158, 158);
+}
+.textAlert > i {
+  margin: 0.5rem;
+  color: rgb(255, 0, 0);
+  font-size: 1.5rem;
+}
+.textOk > i {
+  margin: 0.5rem;
+  color: rgb(0, 213, 255);
+  font-size: 1.5rem;
+}
+.box {
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+  justify-content: center;
+}
