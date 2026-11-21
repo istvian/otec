@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
-import Curso from "../models/Curso";
 import { Contacto, Empresa, sequelize } from "../models";
 import { EmpresaType } from "../models/Empresa";
+import { GetMails } from "../helpers/emailHelper";
 
 // CREATE (POST)
 async function crearEmpresa(req: Request, res: Response): Promise<void> {
@@ -70,6 +70,25 @@ async function obtenerEmpresaPorId(req: Request, res: Response): Promise<void> {
   } catch (error: any) {
     console.error(error);
     res.send({
+      message: "Error al obtener la empresa",
+      error: true,
+    });
+  }
+}
+async function obtenerCorreosEmpresa(
+  req: Request,
+  res: Response,
+): Promise<void> {
+  try {
+    const mails = await GetMails();
+    res.send({
+      data: mails,
+      error: false,
+      message: "Enviado correctamente",
+    });
+  } catch (error: any) {
+    console.error(error);
+    res.status(500).send({
       message: "Error al obtener la empresa",
       error: true,
     });
@@ -161,4 +180,5 @@ export {
   eliminarEmpresa,
   obtenerEmpresas,
   obtenerEmpresaPorId,
+  obtenerCorreosEmpresa,
 };

@@ -6,7 +6,7 @@
   align-items: flex-start;
   justify-content: flex-start;
   margin: 0.5rem 0;
-  min-width: 0;
+  min-width: 200px;
 }
 .label {
   margin: 0rem 0;

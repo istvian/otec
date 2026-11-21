@@ -14,6 +14,11 @@ router.get(
   verificarRol(RolEnum.CUALQUIERA),
   empresaController.obtenerEmpresaPorId,
 );
+router.get(
+  "/correos/:id",
+  verificarRol(RolEnum.CUALQUIERA),
+  empresaController.obtenerCorreosEmpresa,
+);
 router.post(
   "/",
   verificarRol(RolEnum.CUALQUIERA),

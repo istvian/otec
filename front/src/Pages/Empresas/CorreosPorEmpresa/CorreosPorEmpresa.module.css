@@ -1,0 +1,22 @@
+.list {
+  display: flex;
+  flex-flow: row wrap;
+  align-items: flex-start;
+  justify-content: flex-start;
+  width: 100%;
+  flex: 1;
+}
+.correo {
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: flex-start;
+  justify-content: flex-start;
+  margin: 0.5rem;
+  background-color: var(--input-color);
+  padding: 1rem;
+  border-radius: 8px;
+  flex: 1;
+}
+.text {
+  margin: 0;
+}

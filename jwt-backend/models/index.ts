@@ -1,30 +1,100 @@
 import sequelize from "../config/database";
 import Rol from "./Rol";
-import Curso from "./Curso";
+import Curso from "./Curso"; // En diagrama: Curso_SENCE
 import Usuario from "./Usuario";
 import Contacto from "./Contacto";
 import Empresa from "./Empresa";
+import CursoComercial from "./CursoComercial";
+import Negocio from "./Negocio";
+import Cotizacion from "./Cotizacion";
 
-// RELACIONES
-
+// --- ROL & USUARIO ---
 Rol.hasMany(Usuario, {
   foreignKey: "rolID",
   as: "usuarios",
 });
-
 Usuario.belongsTo(Rol, {
-  foreignKey: "id",
+  foreignKey: "rolID", // Corregido (antes decía "id")
   as: "rol",
 });
 
+// --- EMPRESA & CONTACTO ---
 Empresa.hasMany(Contacto, {
   foreignKey: "empresaID",
   as: "contactos",
 });
-
 Contacto.belongsTo(Empresa, {
   foreignKey: "empresaID",
   as: "empresa",
 });
 
-export { sequelize, Usuario, Rol, Curso, Contacto, Empresa };
+// --- NEGOCIO (con Empresa, Contacto y Usuario/Vendedor) ---
+Empresa.hasMany(Negocio, {
+  foreignKey: "empresaID",
+  as: "negocios",
+});
+Negocio.belongsTo(Empresa, {
+  foreignKey: "empresaID",
+  as: "empresa",
+});
+
+// Corregido: la FK vive en Negocio, no en Contacto
+Contacto.hasMany(Negocio, {
+  foreignKey: "contactoID",
+  as: "negocios",
+});
+Negocio.belongsTo(Contacto, {
+  foreignKey: "contactoID",
+  as: "contacto",
+});
+
+Usuario.hasMany(Negocio, {
+  foreignKey: "vendedorID",
+  as: "negocios",
+});
+Negocio.belongsTo(Usuario, {
+  foreignKey: "vendedorID",
+  as: "vendedor",
+});
+
+// --- CURSO & CURSO COMERCIAL ---
+Curso.hasMany(CursoComercial, {
+  foreignKey: "cursoID",
+  as: "cursosComerciales",
+});
+CursoComercial.belongsTo(Curso, {
+  foreignKey: "cursoID",
+  as: "curso",
+});
+
+// --- COTIZACION (con Negocio y CursoComercial) ---
+Negocio.hasMany(Cotizacion, {
+  foreignKey: "negocioID",
+  as: "cotizaciones",
+});
+Cotizacion.belongsTo(Negocio, {
+  foreignKey: "negocioID",
+  as: "negocio", // Corregido a singular
+});
+
+CursoComercial.hasMany(Cotizacion, {
+  foreignKey: "cursoComercialID",
+  as: "cotizaciones",
+});
+Cotizacion.belongsTo(CursoComercial, {
+  foreignKey: "cursoComercialID",
+  as: "cursoComercial",
+});
+
+// Exportar todos los modelos asociados
+export {
+  sequelize,
+  Usuario,
+  Rol,
+  Curso,
+  Contacto,
+  Empresa,
+  CursoComercial,
+  Negocio,
+  Cotizacion,
+};

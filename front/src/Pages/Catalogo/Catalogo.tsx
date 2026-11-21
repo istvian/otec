@@ -10,7 +10,7 @@ import { Btn } from "../../Components/Btn/Btn";
 import { Frame } from "../../Components/Frame/Frame";
 import { Title } from "../../Components/Title/Title";
 import css from "./Catalogo.module.css";
-import type { Curso } from "../../types/general";
+import type { Curso, CursoComercial } from "../../types/general";
 import { InputText } from "../../Components/InputText/InputText";
 import { InputDate } from "../../Components/InputDate/InputDate";
 import { read, utils } from "xlsx";
@@ -18,8 +18,11 @@ import {
   CreateCurso,
   DeleteCurso,
   GetCursos,
+  GetCursosComercial,
   UpdateCurso,
 } from "../../Helpers/APIConnector";
+import { CellBtn } from "../../Components/CellBtn/CellBtn";
+import { useNavigate } from "react-router-dom";
 
 export function Catalogo() {
   const CURSO_INICIAL: Curso = {
@@ -47,6 +50,9 @@ export function Catalogo() {
   };
   const [curso, setCurso] = useState<Curso>({ ...CURSO_INICIAL });
   const [cursos, setCursos] = useState<Curso[]>([]);
+  const [cursosComerciales, setCursosComerciales] = useState<CursoComercial[]>(
+    [],
+  );
   const [popup, setPopup] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -54,6 +60,8 @@ export function Catalogo() {
   useEffect(() => {
     ReloadData();
   }, []);
+
+  const nav = useNavigate();
 
   function stringToDate(fechaStr: string): Date {
     if (!fechaStr) return new Date();
@@ -107,6 +115,11 @@ export function Catalogo() {
           vigencia: new Date(item.vigencia),
         }));
         setCursos(cursosMapeados);
+      }
+    });
+    await GetCursosComercial((res) => {
+      if (!res.error && res.data) {
+        setCursosComerciales(res.data);
       }
     });
   }
@@ -493,11 +506,12 @@ export function Catalogo() {
         )}
       </Box>
       <Box>
-        <Title>Lista de cursos</Title>
+        <Title>Lista de cursos SENCE</Title>
         <div className={css.tableContainer}>
           <table>
             <thead>
               <tr>
+                <th></th>
                 <th></th>
                 <th>Cód.</th>
                 <th>N° Solicitud</th>
@@ -532,8 +546,14 @@ export function Catalogo() {
                 }
                 return (
                   <tr key={item.codigo} className={handleSemaforo()}>
-                    <td
-                      className={css.modificar}
+                    <CellBtn
+                      onClick={() => {
+                        nav(`/catalogo/nuevo/${item.id}`);
+                      }}
+                    >
+                      Crear curso comercial
+                    </CellBtn>
+                    <CellBtn
                       onClick={() => {
                         setPopup(true);
                         setIsEdit(true);
@@ -541,7 +561,7 @@ export function Catalogo() {
                       }}
                     >
                       Modificar
-                    </td>
+                    </CellBtn>
                     <td>{item.codigo}</td>
                     <td>{item.numeroSolicitud}</td>
                     <td>{item.nombre}</td>
@@ -576,6 +596,37 @@ export function Catalogo() {
                     <td>{item.resolucion.toLocaleDateString("es-CL")}</td>
                     <td>{item.vigencia.toLocaleDateString("es-CL")}</td>
                     <td>{item.pago.toLocaleDateString("es-CL")}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </Box>
+      <Box>
+        <Title>Lista de cursos comerciales</Title>
+        <div className={css.tableContainer}>
+          <table>
+            <thead>
+              <tr>
+                <th></th>
+                <th>Nombre</th>
+                <th>Objetivos</th>
+                <th>Temario</th>
+                <th>En base a</th>
+              </tr>
+            </thead>
+            <tbody>
+              {cursosComerciales.map((item) => {
+                return (
+                  <tr key={item.id}>
+                    <td>{item.id}</td>
+                    <td>{item.nombre}</td>
+                    <td>{item.objetivos}</td>
+                    <td>{item.temario}</td>
+                    <td>
+                      {cursos.find((cur) => cur.id == item.cursoID)?.nombre}
+                    </td>
                   </tr>
                 );
               })}
