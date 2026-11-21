@@ -10,13 +10,13 @@ export interface RegisterData {
 }
 
 export interface ResponseBase<T = null> {
-  mensaje: string;
+  message: string;
   error: boolean;
   data?: T | null;
 }
 
 export interface Curso {
-  id?: string;
+  id?: string | number;
   codigo: string;
   numeroSolicitud: string;
   nombre: string;
@@ -51,4 +51,31 @@ export interface Contacto {
   cargo: string;
   telefono: string;
   correo: string;
+}
+export interface CursoComercial {
+  id?: number;
+  nombre: string;
+  objetivos: string;
+  temario: string;
+  cursoID: number;
+}
+
+export interface Correo {
+  id?: number;
+  from: string;
+  to: string;
+  date: string;
+  asunto: string;
+  contenido: string;
+}
+
+export interface NegocioType {
+  id?: number;
+  empresaID: number;
+  contactoID: number;
+  vendedorID: number;
+  estado: boolean;
+  montoTotal: number;
+  fechaCreacion: Date;
+  fechaCierre: Date;
 }

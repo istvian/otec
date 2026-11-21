@@ -1,0 +1,18 @@
+.actions {
+  display: flex;
+  flex-flow: row wrap;
+  align-items: center;
+  justify-content: center;
+}
+.actions > * {
+  margin: 0.5rem;
+}
+
+.tableContainer {
+  width: 100%;
+  display: flex;
+  flex-flow: row wrap;
+  align-items: flex-start;
+  justify-content: flex-start;
+  overflow: auto;
+}

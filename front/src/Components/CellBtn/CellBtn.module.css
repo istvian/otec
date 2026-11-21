@@ -1,5 +1,5 @@
 .btn {
-  background-color: var(--btn-color);
+  background-color: var(--ruta-color);
   color: #fff;
   cursor: pointer;
   transition: all 0.2s;

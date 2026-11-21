@@ -51,6 +51,7 @@ export function Empresas() {
                 <th>RUT</th>
                 <th>Dirección</th>
                 <th>Contactos</th>
+                <th>Correos</th>
               </tr>
             </thead>
             <tbody>
@@ -78,6 +79,13 @@ export function Empresas() {
                     ) : (
                       <td>Sin contactos</td>
                     )}
+                    <CellBtn
+                      onClick={() => {
+                        nav(`/empresas/correos/${item.id}`);
+                      }}
+                    >
+                      Ver correos
+                    </CellBtn>
                   </tr>
                 );
               })}

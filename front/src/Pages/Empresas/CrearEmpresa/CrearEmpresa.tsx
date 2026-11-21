@@ -31,7 +31,7 @@ export function CrearEmpresa() {
       GetEmpresaByID(id, (res) => {
         console.log(res);
         if (res && res.data) {
-          console.log(res.mensaje);
+          console.log(res.message);
           setEmpresa(res.data);
         }
       });
@@ -68,16 +68,16 @@ export function CrearEmpresa() {
     // Validaciones varias
     if (id) {
       UpdateEmpresa(empresa, (res) => {
-        if (res && res.mensaje) {
-          console.log(res.mensaje);
-          alert(res.mensaje);
+        if (res && res.message) {
+          console.log(res.message);
+          alert(res.message);
         }
       });
     } else {
       CreateEmpresa(empresa, (res) => {
-        if (res && res.mensaje) {
-          console.log(res.mensaje);
-          alert(res.mensaje);
+        if (res && res.message) {
+          console.log(res.message);
+          alert(res.message);
         }
       });
     }

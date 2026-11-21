@@ -1,6 +1,8 @@
 import axios from "axios";
 import type {
+  Correo,
   Curso,
+  CursoComercial,
   Empresa,
   LoginData,
   RegisterData,
@@ -101,13 +103,13 @@ export async function GetCursos(
 
 export async function GetCursoById(
   id: string,
-  onEnd: (response: ResponseBase) => void,
+  onEnd: (response: ResponseBase<Curso>) => void,
 ) {
   try {
     console.log("Petición GET:" + BASE_URL + "/api/curso/" + id);
     const response = await api.get("/api/curso/" + id);
     console.log(response.data);
-    if (onEnd) onEnd(response.data as ResponseBase);
+    if (onEnd) onEnd(response.data as ResponseBase<Curso>);
   } catch (e) {
     console.error(e);
   }
@@ -185,6 +187,19 @@ export async function GetEmpresaByID(
     console.error(e);
   }
 }
+export async function GetCorreoEmpresaByID(
+  id: string,
+  onEnd: (response: ResponseBase<Correo[]>) => void,
+) {
+  try {
+    console.log("Petición GET:" + BASE_URL + "/api/empresa/correos/" + id);
+    const response = await api.get("/api/empresa/correos/" + id);
+    console.log(response.data);
+    if (onEnd) onEnd(response.data as ResponseBase<Correo[]>);
+  } catch (e) {
+    console.error(e);
+  }
+}
 
 export async function UpdateEmpresa(
   empresa: Empresa,
@@ -208,6 +223,80 @@ export async function DeleteEmpresa(
   try {
     console.log("Petición DELETE:" + BASE_URL + "/api/empresa/" + id);
     const response = await api.delete("/api/empresa/" + id);
+    console.log(response.data);
+    if (onEnd) onEnd(response.data);
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+// ================= CRUD CURSO =================
+
+export async function CreateCursoComercial(
+  formData: CursoComercial,
+  onEnd: (response: ResponseBase) => void,
+) {
+  try {
+    console.log("Petición POST:" + BASE_URL + "/api/comercial");
+    console.log("Data");
+    console.log(formData);
+    const response = await api.post("/api/comercial", formData);
+    console.log(response.data);
+    if (onEnd) onEnd(response.data);
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+export async function GetCursosComercial(
+  onEnd: (response: ResponseBase<CursoComercial[]>) => void,
+) {
+  try {
+    console.log("Petición GET:" + BASE_URL + "/api/comercial");
+    const response = await api.get("/api/comercial");
+    console.log(response.data);
+    if (onEnd) onEnd(response.data as ResponseBase<CursoComercial[]>);
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+export async function GetCursoComercialById(
+  id: string,
+  onEnd: (response: ResponseBase<CursoComercial>) => void,
+) {
+  try {
+    console.log("Petición GET:" + BASE_URL + "/api/comercial/" + id);
+    const response = await api.get("/api/comercial/" + id);
+    console.log(response.data);
+    if (onEnd) onEnd(response.data as ResponseBase<CursoComercial>);
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+export async function UpdateCursoComercial(
+  curso: CursoComercial,
+  onEnd: (response: ResponseBase) => void,
+) {
+  try {
+    console.log("Petición PATH:" + BASE_URL + "/api/comercial/" + curso.id);
+    console.log("Data");
+    const response = await api.patch("/api/comercial/" + curso.id, curso);
+    console.log(response.data);
+    if (onEnd) onEnd(response.data);
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+export async function DeleteCursoComercial(
+  id: string,
+  onEnd: (response: ResponseBase) => void,
+) {
+  try {
+    console.log("Petición DELETE:" + BASE_URL + "/api/comercial/" + id);
+    const response = await api.delete("/api/comercial/" + id);
     console.log(response.data);
     if (onEnd) onEnd(response.data);
   } catch (e) {
