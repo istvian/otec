@@ -16,6 +16,8 @@ import userRouter from "./routes/user.ts";
 import cursoRouter from "./routes/curso.ts";
 import empresaRouter from "./routes/empresa.ts";
 import cursoComercialRouter from "./routes/cursoComercial.ts";
+import negocioRouter from "./routes/negocioRoutes.ts";
+
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -50,6 +52,7 @@ app.use("/api/user", userRouter);
 app.use("/api/curso", cursoRouter);
 app.use("/api/empresa", empresaRouter);
 app.use("/api/comercial", cursoComercialRouter);
+app.use("/api/negocios", negocioRouter);
 
 app.listen(port, () => {
   console.log("Escuchando en el puerto " + port);
