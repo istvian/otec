@@ -6,7 +6,7 @@ import { Main } from "./Pages/Main/Main";
 import { NotFound } from "./Pages/NotFound/NotFound";
 import { Nav } from "./Components/Nav/Nav";
 import { Catalogo } from "./Pages/Catalogo/Catalogo";
-import { Negocios } from "./Pages/Negocios/Negocios";
+import {Negocios} from "./Pages/Negocios/Negocios";
 import { Empresas } from "./Pages/Empresas/Empresas";
 import { CrearEmpresa } from "./Pages/Empresas/CrearEmpresa/CrearEmpresa";
 import { CrearCurso } from "./Pages/Catalogo/CrearCurso/CrearCurso";

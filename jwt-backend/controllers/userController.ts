@@ -141,4 +141,25 @@ const checkAuth = async (req: Request, res: Response, next: NextFunction) => {
     res.send({ message: "Usuario no logueado", error: true });
   }
 };
-export default { login, register, logout, checkAuth };
+
+const getAllUsers = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const rolIdQuery = req.query.rolID ? Number(req.query.rolID) : null;
+    const whereClause = rolIdQuery ? { rolID: rolIdQuery } : undefined;
+
+    const users = await Usuario.findAll({
+      where: whereClause,
+      attributes: ["id", "nombre", "correo", "rolID"],
+    });
+
+    res.send({
+      message: "Usuarios obtenidos correctamente",
+      error: false,
+      data: users,
+    });
+  } catch (e) {
+    console.error(e);
+    res.send({ message: "Ocurrio un error", error: true });
+  }
+};
+export default { login, register, logout, checkAuth, getAllUsers };
