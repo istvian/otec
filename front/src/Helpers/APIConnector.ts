@@ -27,8 +27,17 @@ export async function Login(
     const response = await api.post("/api/user/login", formData);
     console.log(response.data);
     onEnd(response.data);
-  } catch (e) {
-    console.error(e);
+  } catch (error: any) {
+    if (error.response) {
+      if (error.response.status === 429) {
+        onEnd({
+          error: true,
+          message:
+            "Demasiados intentos fallidos. Por seguridad, intenta nuevamente en 15 minutos.",
+        });
+      }
+    }
+    console.error(error);
   }
 }
 

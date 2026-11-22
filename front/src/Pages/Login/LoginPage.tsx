@@ -16,14 +16,11 @@ export function LoginPage() {
     correo: "",
   });
   const [errorMsg, setErrorMsg] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
 
   const nav = useNavigate();
 
   async function HandleSubmit() {
-    setIsLoading(true);
     await Login(loginData, (res) => {
-      setIsLoading(false);
       if (res.error) {
         setErrorMsg(res.message);
       } else {

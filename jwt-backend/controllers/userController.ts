@@ -54,11 +54,13 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
           error: false,
         });
     } else {
-      res.send({ message: "Error: Datos incorrectos", error: true });
+      res
+        .status(400)
+        .send({ message: "Error: Datos incorrectos", error: true });
     }
   } catch (e) {
     console.error(e);
-    res.send({ message: "Ocurrio un error", error: true });
+    res.status(400).send({ message: "Ocurrio un error", error: true });
   }
 };
 
@@ -72,9 +74,9 @@ const register = async function (
     // Revisa si la petición contiene correo, contraseña y nombre
     if (!req.body.correo || !req.body.contraseña || !req.body.nombre)
       throw new Error("Datos erroneos");
-    // CHEQUEAR SI LA CONTRASEÑA ES SEGURA MINIMO 8 CARACTERES, 1 MAYUSCULA, 1 MINUSCULA, 1 NUMERO CON REGEX
+    // CHEQUEAR SI LA CONTRASEÑA ES SEGURA: MINIMO 8 CARACTERES, 1 MAYUSCULA, 1 MINUSCULA, 1 NUMERO Y 1 SIMBOLO
     const passwordRegex = new RegExp(
-      "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.{8,})",
+      "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[\\W_]).{8,}$",
     );
     // Chequea con regex si el mail es válido
     const mailRegex = new RegExp(

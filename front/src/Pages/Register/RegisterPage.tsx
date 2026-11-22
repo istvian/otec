@@ -75,7 +75,7 @@ export function RegisterPage() {
               contraseña: text.trim(),
             }));
           }}
-          placeholder="Mínimo 8 carácteres, 1 mayuscula, 1 minuscula y 1 número"
+          placeholder="Mínimo 8 carácteres, 1 mayuscula, 1 minuscula, 1 número y 1 simbolo"
           value={registerData?.contraseña}
         />
         {errorMsg != "" ? <p className={css.msg}>{errorMsg}</p> : ""}

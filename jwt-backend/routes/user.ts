@@ -1,8 +1,23 @@
 import express from "express";
 import userController from "../controllers/userController";
 var router = express.Router();
+import rateLimit from "express-rate-limit";
 
-router.post("/login", userController.login);
+export const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // Ventana de bloqueo: 15 minutos
+  max: 3, // Máximo 3 intentos fallidos
+  skipSuccessfulRequests: true, // Clave: si el login responde 2xx (éxito), no suma al contador
+  standardHeaders: true, // Devuelve info del límite en los headers `RateLimit-*`
+  legacyHeaders: false,
+
+  // Opción A: Mensaje directo en JSON
+  message: {
+    error: true,
+    message:
+      "Demasiados intentos fallidos. Por seguridad, intenta nuevamente en 15 minutos.",
+  },
+});
+router.post("/login", loginLimiter, userController.login);
 router.post("/register", userController.register);
 router.get("/check", userController.checkAuth);
 router.get("/logout", userController.logout);
