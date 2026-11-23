@@ -242,10 +242,9 @@ export function CrearNegocio() {
           />
           <InputDate
             label="Fecha de cierre"
-            onChange={(e: any) => {
-              const nuevaFecha = e?.target?.value ? new Date(e.target.value) : e;
-              if (nuevaFecha instanceof Date && !Number.isNaN(nuevaFecha.getTime())) {
-                setFechaCierre(nuevaFecha);
+            onChange={(date: Date) => {
+              if (date instanceof Date && !Number.isNaN(date.getTime())) {
+                setFechaCierre(date);
               }
             }}
             value={fechaCierre}

@@ -1,14 +1,20 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { CheckAuth } from "../Helpers/APIConnector";
 
 type AuthStatus = "checking" | "authorized" | "unauthorized";
 
-const useIsLogin = (watch?: any, redirectTo = ""): AuthStatus => {
+const useIsLogin = (
+  watch?: any,
+  redirectTo = "",
+  enabled = true,
+): AuthStatus => {
   const nav = useNavigate();
   const [status, setStatus] = useState<AuthStatus>("checking");
 
   useEffect(() => {
+    if (!enabled) return;
+
     let cancelled = false;
     setStatus("checking");
 
@@ -28,9 +34,9 @@ const useIsLogin = (watch?: any, redirectTo = ""): AuthStatus => {
     return () => {
       cancelled = true;
     };
-  }, [watch]);
+  }, [watch, enabled]);
 
-  return status;
+  return enabled ? status : "authorized";
 };
 
 export default useIsLogin;

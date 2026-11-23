@@ -56,7 +56,7 @@ export function Catalogo() {
   const [popup, setPopup] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
-  const [archivo, setArchivo] = useState<File | null>(null);
+  const [, setArchivo] = useState<File | null>(null);
   useEffect(() => {
     ReloadData();
   }, []);

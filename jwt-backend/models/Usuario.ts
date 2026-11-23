@@ -24,6 +24,16 @@ const Usuario = sequelize.define("Usuario", {
   rolID: {
     type: DataTypes.INTEGER,
   },
+  activo: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: true,
+  },
+  deleted: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: false,
+  },
 });
 
 export default Usuario;
