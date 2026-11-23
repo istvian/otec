@@ -1,8 +1,13 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { CheckAuth } from "../../Helpers/APIConnector";
+import type { Relator } from "../../types/general";
 import { Box } from "../../Components/Box/Box";
 import { Btn } from "../../Components/Btn/Btn";
 import { Title } from "../../Components/Title/Title";
+import { InputText } from "../../Components/InputText/InputText";
+import { InputDate } from "../../Components/InputDate/InputDate";
+import { Selector } from "../../Components/Selector/Selector";
 import css from "./Negocios.module.css";
 
 interface NegocioItem {
@@ -86,6 +91,19 @@ export function Negocios() {
   const [error, setError] = useState<string | null>(null);
   const [filtroEstado, setFiltroEstado] = useState<string>("Todos");
   const [negocioDetalle, setNegocioDetalle] = useState<NegocioItem | null>(null);
+  const [adjuntos, setAdjuntos] = useState<any[]>([]);
+  const [cargandoAdjuntos, setCargandoAdjuntos] = useState(false);
+  const [subiendoAdjunto, setSubiendoAdjunto] = useState(false);
+  const [relatores, setRelatores] = useState<Relator[]>([]);
+  const [usuarioActual, setUsuarioActual] = useState<any>(null);
+  const [relatorSeleccionado, setRelatorSeleccionado] = useState<string>("");
+  const [modalidadRelator, setModalidadRelator] = useState<string>("Presencial");
+  const [honorariosRelator, setHonorariosRelator] = useState<string>("");
+  const [plazoCobro, setPlazoCobro] = useState<string>("Contado");
+  const [fechaRecepcionOC, setFechaRecepcionOC] = useState<Date>(new Date());
+  const [estadoCobro, setEstadoCobro] = useState<string>("Pendiente");
+  const [observacionesCobro, setObservacionesCobro] = useState<string>("");
+  const [subiendoContrato, setSubiendoContrato] = useState(false);
   const nav = useNavigate();
 
   const cargarCatalogosRelacionados = async () => {
@@ -151,7 +169,40 @@ export function Negocios() {
 
   useEffect(() => {
     cargarNegocios();
+    cargarRelatores();
+    CheckAuth().then((res) => {
+      if (res && !res.error) setUsuarioActual((res as any).userdata || null);
+    });
   }, []);
+
+  useEffect(() => {
+    if (negocioDetalle?.id) {
+      cargarAdjuntos(negocioDetalle.id);
+    } else {
+      setAdjuntos([]);
+    }
+  }, [negocioDetalle?.id]);
+  useEffect(() => {
+    if (!negocioDetalle) return;
+    const nd: any = negocioDetalle;
+    if (nd.condicionCobro === "Contado" || nd.plazoCobroDias === 0 || nd.plazoCobroDias === "0") {
+      setPlazoCobro("Contado");
+    } else if (nd.plazoCobroDias != null) {
+      setPlazoCobro(String(nd.plazoCobroDias));
+    } else if (nd.condicionCobro && nd.condicionCobro !== "Contado") {
+      setPlazoCobro(String(nd.condicionCobro));
+    } else {
+      setPlazoCobro("Contado");
+    }
+    if (nd.fechaRecepcionOC) {
+      setFechaRecepcionOC(new Date(nd.fechaRecepcionOC));
+    } else {
+      const oc = adjuntos.find((a: any) => String(a.tipo).toUpperCase() === "OC");
+      setFechaRecepcionOC(oc?.createdAt ? new Date(oc.createdAt) : new Date());
+    }
+    setEstadoCobro(nd.estadoCobro || "Pendiente");
+    setObservacionesCobro(nd.observacionesCobro || "");
+  }, [negocioDetalle?.id, adjuntos.length]);
 
   const cambiarEstado = async (id: number, nuevoEstado: string) => {
     try {
@@ -174,6 +225,163 @@ export function Negocios() {
     } catch (err) {
       alert(err instanceof Error ? err.message : "Error al cambiar estado");
     }
+  };
+
+  const cargarAdjuntos = async (negocioID: number) => {
+    try {
+      setCargandoAdjuntos(true);
+      const res = await fetch(`${API_URL}/adjuntos?negocioID=${negocioID}`, {
+        credentials: "include",
+      });
+      if (!res.ok) return;
+      const data = await res.json();
+      const lista = Array.isArray(data) ? data : data?.data || [];
+      setAdjuntos(lista);
+    } catch {
+      setAdjuntos([]);
+    } finally {
+      setCargandoAdjuntos(false);
+    }
+  };
+
+  const cargarRelatores = async () => {
+    try {
+      const res = await fetch(`${API_URL}/relatores`, { credentials: "include" });
+      if (!res.ok) return;
+      const data = await res.json();
+      const lista = Array.isArray(data) ? data : data?.data || [];
+      setRelatores(lista);
+    } catch {
+      setRelatores([]);
+    }
+  };
+
+  const esAutorizadoRelator = () => {
+    const rolId = Number(usuarioActual?.rolID ?? usuarioActual?.rol?.id ?? usuarioActual?.rol);
+    return [3, 6, 5].includes(rolId);
+  };
+
+  const contratos = adjuntos.filter((a: any) => String(a.tipo).toLowerCase() === "contrato");
+
+  const subirContrato = async (file: File) => {
+    if (!negocioDetalle) return;
+    if (!relatorSeleccionado) {
+      alert("Selecciona un relator");
+      return;
+    }
+    try {
+      setSubiendoContrato(true);
+      const fd = new FormData();
+      fd.append("archivo", file);
+      fd.append("file", file);
+      fd.append("tipo", "Contrato");
+      fd.append("negocioID", String(negocioDetalle.id));
+      fd.append("relatorID", relatorSeleccionado);
+      fd.append("modalidad", modalidadRelator);
+      if (honorariosRelator) fd.append("honorarios", honorariosRelator);
+      const res = await fetch(`${API_URL}/adjuntos`, {
+        method: "POST",
+        credentials: "include",
+        body: fd,
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data?.message || "No se pudo subir el contrato");
+        return;
+      }
+      await cargarAdjuntos(negocioDetalle.id);
+      setRelatorSeleccionado("");
+      setHonorariosRelator("");
+    } catch (err) {
+      alert("Error al subir el contrato");
+    } finally {
+      setSubiendoContrato(false);
+    }
+  };
+
+  const subirAdjunto = async (file: File, tipo: string) => {
+    if (!negocioDetalle) return;
+    try {
+      setSubiendoAdjunto(true);
+      const fd = new FormData();
+      fd.append("archivo", file);
+      fd.append("file", file);
+      fd.append("tipo", tipo);
+      fd.append("negocioID", String(negocioDetalle.id));
+      const res = await fetch(`${API_URL}/adjuntos`, {
+        method: "POST",
+        credentials: "include",
+        body: fd,
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data?.message || "No se pudo subir el adjunto");
+        return;
+      }
+      await cargarAdjuntos(negocioDetalle.id);
+    } catch (err) {
+      alert("Error al subir el adjunto");
+    } finally {
+      setSubiendoAdjunto(false);
+    }
+  };
+
+  const eliminarAdjunto = async (id: number) => {
+    if (!confirm("¿Eliminar este adjunto?")) return;
+    try {
+      const res = await fetch(`${API_URL}/adjuntos/${id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      if (!res.ok) throw new Error("No se pudo eliminar");
+      if (negocioDetalle) await cargarAdjuntos(negocioDetalle.id);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Error al eliminar");
+    }
+  };
+
+  const coordinarCurso = async () => {
+    if (!negocioDetalle) return;
+    try {
+      const res = await fetch(`${API_URL}/negocios/${negocioDetalle.id}/coordinar`, {
+        method: "PATCH",
+        credentials: "include",
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data?.message || "No se pudo coordinar el curso");
+        return;
+      }
+      alert("Curso coordinado exitosamente");
+      setNegocioDetalle((prev) => (prev ? { ...prev, estadoOperacion: "Coordinado" } : null));
+    } catch (err) {
+      alert("Error al coordinar el curso");
+    }
+  };
+
+  const ejecutarCurso = async () => {
+    if (!negocioDetalle) return;
+    try {
+      const res = await fetch(`${API_URL}/negocios/${negocioDetalle.id}/ejecutar`, {
+        method: "PATCH",
+        credentials: "include",
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data?.message || "No se pudo ejecutar el curso");
+        return;
+      }
+      alert("Curso en ejecución");
+      setNegocioDetalle((prev) =>
+        prev ? { ...prev, estadoOperacion: "En ejecucion" } : null
+      );
+    } catch (err) {
+      alert("Error al ejecutar el curso");
+    }
+  };
+
+  const descargarAdjunto = (id: number) => {
+    window.open(`${API_URL}/adjuntos/${id}/descargar`, "_blank");
   };
 
   const obtenerNombreCurso = (cursoID?: number | null) => {
@@ -324,16 +532,15 @@ export function Negocios() {
       >
         <Title>Negocios</Title>
         <div className={css.actions}>
-          <select
-            value={filtroEstado}
-            onChange={(e) => setFiltroEstado(e.target.value)}
-            aria-label="Filtrar por estado"
-          >
-            <option value="Todos">Todos los estados</option>
-            <option value="Abierto">Abierto</option>
-            <option value="Ganado">Ganado</option>
-            <option value="Perdido/Vencido">Perdido/Vencido</option>
-          </select>
+          <Selector
+            title=""
+            firstOption="Todos los estados"
+            data={filtroEstado === "Todos" ? "Todos los estados" : filtroEstado}
+            options={["Todos los estados", "Abierto", "Ganado", "Perdido/Vencido"]}
+            setData={(val) =>
+              setFiltroEstado(val === "Todos los estados" ? "Todos" : val)
+            }
+          />
 
           <Btn
             onClick={() => {
@@ -379,14 +586,13 @@ export function Negocios() {
                       <td>{obtenerNombreEmpresa(item)}</td>
                       <td>{obtenerNombreVendedor(item.vendedorID)}</td>
                       <td>
-                        <select
-                          value={item.estado}
-                          onChange={(e) => cambiarEstado(item.id, e.target.value)}
-                        >
-                          <option value="Abierto">Abierto</option>
-                          <option value="Ganado">Ganado</option>
-                          <option value="Perdido/Vencido">Perdido/Vencido</option>
-                        </select>
+                        <Selector
+                          title=""
+                          firstOption="Estado"
+                          data={item.estado}
+                          options={["Abierto", "Ganado", "Perdido/Vencido"]}
+                          setData={(val) => cambiarEstado(item.id, val)}
+                        />
                       </td>
                       <td>{formatCLP(item.montoTotal)}</td>
                       <td>{formatFecha(item.fechaCreacion)}</td>
@@ -424,7 +630,23 @@ export function Negocios() {
                 {negocioDetalle.estado}
               </span>
             </div>
-            <Btn onClick={() => setNegocioDetalle(null)}>Cerrar ficha</Btn>
+            <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+              <Btn
+                onClick={() => {
+                  const params = new URLSearchParams({
+                    empresaID: String(negocioDetalle.empresaID),
+                    negocioID: String(negocioDetalle.id),
+                  });
+                  if (negocioDetalle.cursoID) {
+                    params.set("cursoID", String(negocioDetalle.cursoID));
+                  }
+                  nav(`/cotizaciones/crear?${params.toString()}`);
+                }}
+              >
+                Generar cotización
+              </Btn>
+              <Btn onClick={() => setNegocioDetalle(null)}>Cerrar ficha</Btn>
+            </div>
           </div>
 
           <section style={{ marginTop: "1.25rem" }}>
@@ -453,27 +675,18 @@ export function Negocios() {
               {renderCampoFormal("Fecha estimada de cierre", formatFecha(negocioDetalle.fechaCierre))}
               {renderCampoFormal(
                 "Estado comercial",
-                <select
-                  value={negocioDetalle.estado}
-                  style={{
-                    padding: "0.25rem 0.5rem",
-                    borderRadius: "4px",
-                    border: "1px solid #cbd5e1",
-                    backgroundColor: "#ffffff",
-                    fontWeight: 500,
-                  }}
-                  onChange={async (e) => {
-                    const nuevoEstado = e.target.value;
-                    await cambiarEstado(negocioDetalle.id, nuevoEstado);
+                <Selector
+                  title=""
+                  firstOption="Estado"
+                  data={negocioDetalle.estado}
+                  options={["Abierto", "Ganado", "Perdido/Vencido"]}
+                  setData={async (val) => {
+                    await cambiarEstado(negocioDetalle.id, val);
                     setNegocioDetalle((prev) =>
-                      prev ? { ...prev, estado: nuevoEstado } : null
+                      prev ? { ...prev, estado: val } : null
                     );
                   }}
-                >
-                  <option value="Abierto">Abierto</option>
-                  <option value="Ganado">Ganado</option>
-                  <option value="Perdido/Vencido">Perdido/Vencido</option>
-                </select>
+                />
               )}
               {negocioDetalle.contactoID &&
                 renderCampoFormal("ID Contacto asociado", `#${negocioDetalle.contactoID}`)}
@@ -581,7 +794,9 @@ export function Negocios() {
               {renderCampoFormal("Teléfono", vendedorActual?.telefono || "No registrado")}
               {renderCampoFormal(
                 "Cargo / Rol",
-                vendedorActual?.rol ||
+                (typeof vendedorActual?.rol === "object" && vendedorActual?.rol
+                  ? (vendedorActual.rol as any).nombre
+                  : vendedorActual?.rol) ||
                   (vendedorActual?.rolID === 2
                     ? "Ejecutivo Comercial (Vendedor)"
                     : vendedorActual?.rolID
@@ -660,6 +875,353 @@ export function Negocios() {
                   ])}
               </div>
             )}
+          </section>
+
+          <section style={{ marginTop: "1.5rem" }}>
+            <h3
+              style={{
+                fontSize: "1rem",
+                fontWeight: 700,
+                color: "#1e293b",
+                borderBottom: "1px solid #cbd5e1",
+                paddingBottom: "0.35rem",
+                marginBottom: "0.75rem",
+              }}
+            >
+              5. Respaldos (Orden de Compra y Nómina SENCE)
+            </h3>
+
+            <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", marginBottom: "1rem" }}>
+              <label style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                <span style={{ fontSize: "0.85rem", fontWeight: 600 }}>OC (PDF):</span>
+                <input
+                  type="file"
+                  accept=".pdf,application/pdf"
+                  disabled={subiendoAdjunto}
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (f) subirAdjunto(f, "OC");
+                    e.target.value = "";
+                  }}
+                />
+              </label>
+              <label style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                <span style={{ fontSize: "0.85rem", fontWeight: 600 }}>Nómina (Excel/PDF):</span>
+                <input
+                  type="file"
+                  accept=".pdf,.xls,.xlsx,application/pdf,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                  disabled={subiendoAdjunto}
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (f) subirAdjunto(f, "Nomina");
+                    e.target.value = "";
+                  }}
+                />
+              </label>
+            </div>
+
+            {cargandoAdjuntos ? (
+              <p>Cargando adjuntos...</p>
+            ) : adjuntos.length === 0 ? (
+              <p style={{ color: "#64748b", fontStyle: "italic" }}>
+                No hay respaldos adjuntos. Adjunte la Orden de Compra para coordinar/ejecutar el curso.
+              </p>
+            ) : (
+              <div className={css.tableContainer}>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Tipo</th>
+                      <th>Archivo</th>
+                      <th>Fecha</th>
+                      <th>Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {adjuntos.map((a: any) => (
+                      <tr key={a.id}>
+                        <td>{a.tipo}</td>
+                        <td>{a.nombreArchivo}</td>
+                        <td>{formatFecha(a.createdAt || a.fechaSubida)}</td>
+                        <td style={{ display: "flex", gap: "0.4rem" }}>
+                          <Btn onClick={() => descargarAdjunto(a.id)}>Descargar</Btn>
+                          <Btn warning onClick={() => eliminarAdjunto(a.id)}>
+                            Eliminar
+                          </Btn>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            <div style={{ display: "flex", gap: "0.5rem", marginTop: "1rem", flexWrap: "wrap" }}>
+              <Btn onClick={coordinarCurso}>Coordinar curso</Btn>
+              <Btn onClick={ejecutarCurso}>Ejecutar curso</Btn>
+            </div>
+            <p style={{ fontSize: "0.8rem", color: "#64748b", marginTop: "0.5rem" }}>
+              La coordinación/ejecución requiere la Orden de Compra (OC) adjunta.
+            </p>
+          </section>
+
+          <section style={{ marginTop: "1.5rem" }}>
+            <h3
+              style={{
+                fontSize: "1rem",
+                fontWeight: 700,
+                color: "#1e293b",
+                borderBottom: "1px solid #cbd5e1",
+                paddingBottom: "0.35rem",
+                marginBottom: "0.75rem",
+              }}
+            >
+              6. Asignación y Formalización del Relator
+            </h3>
+
+            {!esAutorizadoRelator() ? (
+              <p style={{ color: "#64748b", fontStyle: "italic" }}>
+                Los honorarios y contratos de relator son visibles únicamente para perfiles
+                autorizados (Operaciones, RRHH, Admin).
+              </p>
+            ) : (
+              <>
+                <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", marginBottom: "1rem", alignItems: "center" }}>
+                  <label style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
+                    <span style={{ fontSize: "0.85rem", fontWeight: 600 }}>Relator:</span>
+                    <Selector
+                      title=""
+                      firstOption="-- Seleccionar relator --"
+                      data={
+                        (relatores
+                          .filter((r) => r.activo !== false)
+                          .map((r) => `${r.nombre} ${r.especialidad ? `(${r.especialidad})` : ""}`.trim())
+                          .find((_, idx) => {
+                            const rr = relatores.filter((x) => x.activo !== false)[idx];
+                            return String(rr?.id) === relatorSeleccionado;
+                          })) || ""
+                      }
+                      options={relatores
+                        .filter((r) => r.activo !== false)
+                        .map((r) => `${r.nombre} ${r.especialidad ? `(${r.especialidad})` : ""}`.trim())}
+                      setData={(val) => {
+                        const r = relatores
+                          .filter((x) => x.activo !== false)
+                          .find((x) => `${x.nombre} ${x.especialidad ? `(${x.especialidad})` : ""}`.trim() === val);
+                        setRelatorSeleccionado(r ? String(r.id) : "");
+                      }}
+                    />
+                  </label>
+                  <label style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
+                    <span style={{ fontSize: "0.85rem", fontWeight: 600 }}>Modalidad:</span>
+                    <Selector
+                      title=""
+                      firstOption="Modalidad"
+                      data={modalidadRelator}
+                      options={["Presencial", "Online", "Distancia"]}
+                      setData={setModalidadRelator}
+                    />
+                  </label>
+                  <label style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
+                    <span style={{ fontSize: "0.85rem", fontWeight: 600 }}>Honorarios (CLP):</span>
+                    <InputText
+                       label=""
+                       type="number"
+                       value={honorariosRelator}
+                       onChange={(text) => setHonorariosRelator(text)}
+                       placeholder="Honorarios (CLP)"
+                     />
+                  </label>
+                  <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginTop: "1.2rem" }}>
+                    <span style={{ fontSize: "0.85rem", fontWeight: 600 }}>Contrato (PDF):</span>
+                    <input
+                      type="file"
+                      accept=".pdf,application/pdf"
+                      disabled={subiendoContrato}
+                      onChange={(e) => {
+                        const f = e.target.files?.[0];
+                        if (f) subirContrato(f);
+                        e.target.value = "";
+                      }}
+                    />
+                  </label>
+                </div>
+
+                {subiendoContrato && <p>Subiendo contrato...</p>}
+
+                {contratos.length === 0 ? (
+                  <p style={{ color: "#64748b", fontStyle: "italic" }}>
+                    No hay contratos de relator asignados.
+                  </p>
+                ) : (
+                  <div className={css.tableContainer}>
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>Relator</th>
+                          <th>Modalidad</th>
+                          <th>Honorarios</th>
+                          <th>Archivo</th>
+                          <th>Acciones</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {contratos.map((a: any) => (
+                          <tr key={a.id}>
+                            <td>{a.relator?.nombre || (a.relatorID ? `Relator #${a.relatorID}` : "-")}</td>
+                            <td>{a.modalidad || "-"}</td>
+                            <td>{a.honorarios != null ? formatCLP(Number(a.honorarios)) : "-"}</td>
+                            <td>{a.nombreArchivo}</td>
+                            <td style={{ display: "flex", gap: "0.4rem" }}>
+                              <Btn onClick={() => window.open(`${API_URL}/adjuntos/${a.id}/descargar`, "_blank")}>
+                                Descargar
+                              </Btn>
+                              <Btn warning onClick={() => eliminarAdjunto(a.id)}>
+                                Eliminar
+                              </Btn>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </>
+            )}
+          </section>
+
+          <section style={{ marginTop: "1.5rem" }}>
+            <h3
+              style={{
+                fontSize: "1rem",
+                fontWeight: 700,
+                color: "#1e293b",
+                borderBottom: "1px solid #cbd5e1",
+                paddingBottom: "0.35rem",
+                marginBottom: "0.75rem",
+              }}
+            >
+              7. Condiciones y Plazos de Cobro B2B
+            </h3>
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(230px, 1fr))",
+                gap: "0.75rem",
+                marginBottom: "1rem",
+              }}
+            >
+              {renderCampoFormal(
+                "Condición actual",
+                (negocioDetalle as any).condicionCobro
+                  ? (negocioDetalle as any).condicionCobro === "Contado"
+                    ? "Contado"
+                    : `${(negocioDetalle as any).condicionCobro} días`
+                  : "No registrada"
+              )}
+              {renderCampoFormal(
+                "Fecha recepción OC",
+                (negocioDetalle as any).fechaRecepcionOC
+                  ? formatFecha(String((negocioDetalle as any).fechaRecepcionOC))
+                  : "No registrada"
+              )}
+              {renderCampoFormal(
+                "Fecha estimada de cobro",
+                (negocioDetalle as any).fechaEstimadaCobro
+                  ? formatFecha(String((negocioDetalle as any).fechaEstimadaCobro))
+                  : "No calculada"
+              )}
+              {renderCampoFormal(
+                "Estado de cobro",
+                (negocioDetalle as any).estadoCobro || "Pendiente"
+              )}
+            </div>
+
+            <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap", alignItems: "flex-end", marginBottom: "0.75rem" }}>
+              <label style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
+                <span style={{ fontSize: "0.85rem", fontWeight: 600 }}>Plazo de pago:</span>
+                <Selector
+                  title=""
+                  firstOption="Plazo"
+                  data={plazoCobro}
+                  options={["Contado", "30", "45", "60"]}
+                  setData={setPlazoCobro}
+                />
+              </label>
+              <label style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
+                <span style={{ fontSize: "0.85rem", fontWeight: 600 }}>Fecha recepción OC:</span>
+                <InputDate
+                  label=""
+                  value={fechaRecepcionOC}
+                  onChange={(d) => setFechaRecepcionOC(d)}
+                />
+              </label>
+              <label style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
+                <span style={{ fontSize: "0.85rem", fontWeight: 600 }}>Estado de cobro:</span>
+                <Selector
+                  title=""
+                  firstOption="Estado"
+                  data={estadoCobro}
+                  options={["Pendiente", "Cobrado", "Vencido"]}
+                  setData={setEstadoCobro}
+                />
+              </label>
+              <Btn
+                onClick={async () => {
+                  const plazo = plazoCobro;
+                  const fecha = fechaRecepcionOC.toISOString().slice(0, 10);
+                  const estado = estadoCobro;
+                  try {
+                    const res = await fetch(`${API_URL}/negocios/${negocioDetalle.id}/cobro`, {
+                      method: "PATCH",
+                      headers: { "Content-Type": "application/json" },
+                      credentials: "include",
+                      body: JSON.stringify({
+                        plazo,
+                        fechaRecepcionOC: fecha,
+                        estadoCobro: estado,
+                        observacionesCobro,
+                      }),
+                    });
+                    const data = await res.json();
+                    if (!res.ok) {
+                      alert(data?.message || "No se pudo registrar la condición de cobro");
+                      return;
+                    }
+                    const actualizado = data?.data || data;
+                    setNegocioDetalle((prev) =>
+                      prev ? { ...prev, ...actualizado } : null
+                    );
+                    alert("Condición de cobro registrada correctamente");
+                  } catch (err) {
+                    alert("Error al registrar la condición de cobro");
+                  }
+                }}
+              >
+                Registrar condición de cobro
+              </Btn>
+            </div>
+
+            <label style={{ display: "flex", flexDirection: "column", gap: "0.25rem", marginBottom: "0.75rem" }}>
+              <span style={{ fontSize: "0.85rem", fontWeight: 600 }}>Observaciones:</span>
+              <InputText
+                label=""
+                value={observacionesCobro}
+                onChange={(text) => setObservacionesCobro(text)}
+                placeholder="Observaciones"
+                isArea
+              />
+            </label>
+
+            {!adjuntos.some((a: any) => String(a.tipo).toUpperCase() === "OC") && (
+              <p style={{ fontSize: "0.8rem", color: "#b45309", marginTop: "0.5rem" }}>
+                Advertencia: no hay Orden de Compra (OC) adjunta. La condición de cobro se calcula a partir de la recepción de la OC.
+              </p>
+            )}
+            <p style={{ fontSize: "0.8rem", color: "#64748b", marginTop: "0.5rem" }}>
+              Plazos estándar: Contado, 30, 45 o 60 días a partir de la recepción de la OC.
+            </p>
           </section>
         </Box>
       )}

@@ -1,6 +1,7 @@
 import axios from "axios";
 import type {
   Correo,
+  Cotizacion,
   Curso,
   CursoComercial,
   Empresa,
@@ -311,4 +312,182 @@ export async function DeleteCursoComercial(
   } catch (e) {
     console.error(e);
   }
+}
+
+// ================= CRUD COTIZACIONES =================
+
+export async function GetCotizaciones(
+  onEnd: (response: ResponseBase<Cotizacion[]>) => void,
+) {
+  try {
+    console.log("Petición GET:" + BASE_URL + "/api/cotizaciones");
+    const response = await api.get("/api/cotizaciones");
+    console.log(response.data);
+    if (onEnd) onEnd(response.data as ResponseBase<Cotizacion[]>);
+  } catch (e: any) {
+    console.error(e);
+    if (onEnd)
+      onEnd({
+        message:
+          e?.response?.data?.message || "Error al obtener las cotizaciones",
+        error: true,
+      });
+  }
+}
+
+export async function GetCotizacionById(
+  id: string,
+  onEnd: (response: ResponseBase<Cotizacion>) => void,
+) {
+  try {
+    console.log("Petición GET:" + BASE_URL + "/api/cotizaciones/" + id);
+    const response = await api.get("/api/cotizaciones/" + id);
+    console.log(response.data);
+    if (onEnd) onEnd(response.data as ResponseBase<Cotizacion>);
+  } catch (e: any) {
+    console.error(e);
+    if (onEnd)
+      onEnd({
+        message: e?.response?.data?.message || "Error al obtener la cotización",
+        error: true,
+      });
+  }
+}
+
+export async function CreateCotizacion(
+  formData: Partial<Cotizacion>,
+  onEnd: (response: ResponseBase<Cotizacion>) => void,
+) {
+  try {
+    console.log("Petición POST:" + BASE_URL + "/api/cotizaciones");
+    const response = await api.post("/api/cotizaciones", formData);
+    console.log(response.data);
+    if (onEnd) onEnd(response.data as ResponseBase<Cotizacion>);
+  } catch (e: any) {
+    console.error(e);
+    if (onEnd)
+      onEnd({
+        message: e?.response?.data?.message || "Error al crear la cotización",
+        error: true,
+      });
+  }
+}
+
+export async function UpdateCotizacion(
+  cotizacion: Partial<Cotizacion> & { id: number },
+  onEnd: (response: ResponseBase<Cotizacion>) => void,
+) {
+  try {
+    console.log(
+      "Petición PATCH:" + BASE_URL + "/api/cotizaciones/" + cotizacion.id,
+    );
+    const response = await api.patch(
+      "/api/cotizaciones/" + cotizacion.id,
+      cotizacion,
+    );
+    console.log(response.data);
+    if (onEnd) onEnd(response.data as ResponseBase<Cotizacion>);
+  } catch (e: any) {
+    console.error(e);
+    if (onEnd)
+      onEnd({
+        message:
+          e?.response?.data?.message || "Error al actualizar la cotización",
+        error: true,
+      });
+  }
+}
+
+export async function DeleteCotizacion(
+  id: string | number,
+  onEnd: (response: ResponseBase) => void,
+) {
+  try {
+    console.log("Petición DELETE:" + BASE_URL + "/api/cotizaciones/" + id);
+    const response = await api.delete("/api/cotizaciones/" + id);
+    console.log(response.data);
+    if (onEnd) onEnd(response.data as ResponseBase);
+  } catch (e: any) {
+    console.error(e);
+    if (onEnd)
+      onEnd({
+        message:
+          e?.response?.data?.message || "Error al eliminar la cotización",
+        error: true,
+      });
+  }
+}
+
+export async function RevalidarCotizacion(
+  id: string | number,
+  payload: Partial<Cotizacion> & Record<string, unknown> = {},
+  onEnd: (response: ResponseBase<Cotizacion>) => void,
+) {
+  try {
+    console.log("Petición POST:" + BASE_URL + "/api/cotizaciones/" + id + "/revalidar");
+    const response = await api.post("/api/cotizaciones/" + id + "/revalidar", payload);
+    console.log(response.data);
+    if (onEnd) onEnd(response.data as ResponseBase<Cotizacion>);
+  } catch (e: any) {
+    console.error(e);
+    if (onEnd)
+      onEnd({
+        message:
+          e?.response?.data?.message || "Error al revalidar la cotización",
+        error: true,
+      });
+  }
+}
+
+export async function GetCotizacionesVencidas(
+  onEnd: (response: ResponseBase<Cotizacion[]>) => void,
+) {
+  try {
+    console.log("Petición GET:" + BASE_URL + "/api/cotizaciones/vencidas");
+    const response = await api.get("/api/cotizaciones/vencidas");
+    console.log(response.data);
+    if (onEnd) onEnd(response.data as ResponseBase<Cotizacion[]>);
+  } catch (e: any) {
+    console.error(e);
+    if (onEnd)
+      onEnd({
+        message:
+          e?.response?.data?.message || "Error al obtener las cotizaciones vencidas",
+        error: true,
+      });
+  }
+}
+
+export async function GetCotizacionPublica(
+  token: string,
+  onEnd: (response: ResponseBase<Cotizacion>) => void,
+) {
+  try {
+    console.log("Petición GET:" + BASE_URL + "/api/cotizaciones/public/" + token);
+    const response = await api.get("/api/cotizaciones/public/" + token);
+    console.log(response.data);
+    if (onEnd) onEnd(response.data as ResponseBase<Cotizacion>);
+  } catch (e: any) {
+    console.error(e);
+    if (onEnd)
+      onEnd({
+        message:
+          e?.response?.data?.message ||
+          "No se pudo cargar la cotización. Verifica el enlace.",
+        error: true,
+      });
+  }
+}
+
+export function UrlPublicaCotizacion(token?: string | null) {
+  if (!token) return "";
+  return `${window.location.origin}/cotizaciones/publica/${token}`;
+}
+
+export function UrlPdfCotizacion(id: string | number) {
+  return `${BASE_URL}/api/cotizaciones/${id}/pdf`;
+}
+
+export function UrlPdfCotizacionPublica(token: string) {
+  return `${BASE_URL}/api/cotizaciones/public/${token}/pdf`;
 }

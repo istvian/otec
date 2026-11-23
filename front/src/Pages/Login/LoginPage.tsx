@@ -8,7 +8,6 @@ import { Title } from "../../Components/Title/Title";
 import type { LoginData } from "../../types/general";
 import { Login } from "../../Helpers/APIConnector";
 import { Link, useNavigate } from "react-router-dom";
-import useIsLogin from "../../Hooks/useIsLogin";
 
 export function LoginPage() {
   const [loginData, setLoginData] = useState<LoginData>({

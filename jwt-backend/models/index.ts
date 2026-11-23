@@ -7,6 +7,8 @@ import Empresa from "./Empresa";
 import CursoComercial from "./CursoComercial";
 import Negocio from "./Negocio";
 import Cotizacion from "./Cotizacion";
+import Adjunto from "./Adjunto";
+import Relator from "./Relator";
 
 // --- ROL & USUARIO ---
 Rol.hasMany(Usuario, {
@@ -86,6 +88,81 @@ Cotizacion.belongsTo(CursoComercial, {
   as: "cursoComercial",
 });
 
+// --- COTIZACION (snapshots de Empresa, Contacto, Vendedor y Curso SENCE) ---
+Empresa.hasMany(Cotizacion, {
+  foreignKey: "empresaID",
+  as: "cotizaciones",
+});
+Cotizacion.belongsTo(Empresa, {
+  foreignKey: "empresaID",
+  as: "empresa",
+});
+
+Contacto.hasMany(Cotizacion, {
+  foreignKey: "contactoID",
+  as: "cotizaciones",
+});
+Cotizacion.belongsTo(Contacto, {
+  foreignKey: "contactoID",
+  as: "contacto",
+});
+
+Usuario.hasMany(Cotizacion, {
+  foreignKey: "vendedorID",
+  as: "cotizaciones",
+});
+Cotizacion.belongsTo(Usuario, {
+  foreignKey: "vendedorID",
+  as: "vendedor",
+});
+
+Curso.hasMany(Cotizacion, {
+  foreignKey: "cursoID",
+  as: "cotizaciones",
+});
+Cotizacion.belongsTo(Curso, {
+  foreignKey: "cursoID",
+  as: "curso",
+});
+
+// --- ADJUNTO (respaldo OC y nómina) ---
+Negocio.hasMany(Adjunto, {
+  foreignKey: "negocioID",
+  as: "adjuntos",
+});
+Adjunto.belongsTo(Negocio, {
+  foreignKey: "negocioID",
+  as: "negocio",
+});
+
+Curso.hasMany(Adjunto, {
+  foreignKey: "cursoID",
+  as: "adjuntos",
+});
+Adjunto.belongsTo(Curso, {
+  foreignKey: "cursoID",
+  as: "curso",
+});
+
+Usuario.hasMany(Adjunto, {
+  foreignKey: "usuarioID",
+  as: "adjuntos",
+});
+Adjunto.belongsTo(Usuario, {
+  foreignKey: "usuarioID",
+  as: "usuario",
+});
+
+// --- RELATOR & ADJUNTO (contrato de servicios) ---
+Relator.hasMany(Adjunto, {
+  foreignKey: "relatorID",
+  as: "contratos",
+});
+Adjunto.belongsTo(Relator, {
+  foreignKey: "relatorID",
+  as: "relator",
+});
+
 // Exportar todos los modelos asociados
 export {
   sequelize,
@@ -97,4 +174,6 @@ export {
   CursoComercial,
   Negocio,
   Cotizacion,
+  Adjunto,
+  Relator,
 };

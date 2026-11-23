@@ -147,11 +147,14 @@ const checkAuth = async (req: Request, res: Response, next: NextFunction) => {
 const getAllUsers = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const rolIdQuery = req.query.rolID ? Number(req.query.rolID) : null;
-    const whereClause = rolIdQuery ? { rolID: rolIdQuery } : undefined;
+    const whereClause: any = { deleted: false };
+    if (rolIdQuery) whereClause.rolID = rolIdQuery;
 
     const users = await Usuario.findAll({
       where: whereClause,
-      attributes: ["id", "nombre", "correo", "rolID"],
+      attributes: ["id", "nombre", "correo", "rolID", "activo", "deleted"],
+      include: [{ model: Rol, as: "rol", attributes: ["id", "nombre", "descripcion"] }],
+      order: [["id", "DESC"]],
     });
 
     res.send({
@@ -164,4 +167,122 @@ const getAllUsers = async (req: Request, res: Response, next: NextFunction) => {
     res.send({ message: "Ocurrio un error", error: true });
   }
 };
-export default { login, register, logout, checkAuth, getAllUsers };
+
+const getUserById = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params;
+    const user = await Usuario.findOne({
+      where: { id, deleted: false },
+      attributes: { exclude: ["contraseña"] },
+      include: [{ model: Rol, as: "rol", attributes: ["id", "nombre", "descripcion"] }],
+    });
+    if (!user) {
+      res.status(404).json({ message: "Usuario no encontrado", error: true });
+      return;
+    }
+    res.send({ message: "Usuario obtenido correctamente", error: false, data: user });
+  } catch (e) {
+    console.error(e);
+    res.status(500).send({ message: "Ocurrio un error", error: true });
+  }
+};
+
+const validatePassword = (password: string) => {
+  const passwordRegex = new RegExp(
+    "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[\\W_]).{8,}$",
+  );
+  return passwordRegex.test(password);
+};
+
+const createUserAdmin = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { nombre, correo, contraseña, rolID } = req.body || {};
+    if (!nombre || !correo || !contraseña) throw new Error("Datos erroneos");
+
+    const mailRegex = new RegExp("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+.[a-zA-Z]{2,}$");
+    if (!mailRegex.test(correo)) throw new Error("El mail no es valido");
+    if (!validatePassword(contraseña))
+      throw new Error("La contraseña no cumple con los requisitos");
+
+    const hashedPassword = await passwordHelper.HashPassword(contraseña);
+    const user = await Usuario.create({
+      correo,
+      contraseña: hashedPassword,
+      nombre,
+      rolID: rolID ? Number(rolID) : 1,
+      activo: true,
+      deleted: false,
+    });
+    const safeUser = await Usuario.findByPk((user as any).id, {
+      attributes: { exclude: ["contraseña"] },
+      include: [{ model: Rol, as: "rol", attributes: ["id", "nombre", "descripcion"] }],
+    });
+    res.status(201).send({ message: "Usuario creado correctamente", error: false, data: safeUser });
+  } catch (e: any) {
+    console.error(e);
+    res.status(400).send({ message: e?.message || "Ocurrio un error", error: true });
+  }
+};
+
+const updateUserAdmin = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params;
+    const user: any = await Usuario.findOne({ where: { id, deleted: false } });
+    if (!user) {
+      res.status(404).json({ message: "Usuario no encontrado", error: true });
+      return;
+    }
+    const { nombre, correo, contraseña, rolID, activo } = req.body || {};
+    if (nombre !== undefined) user.set("nombre", nombre);
+    if (correo !== undefined) {
+      const mailRegex = new RegExp("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+.[a-zA-Z]{2,}$");
+      if (!mailRegex.test(correo)) {
+        res.status(400).json({ message: "El mail no es valido", error: true });
+        return;
+      }
+      user.set("correo", correo);
+    }
+    if (rolID !== undefined) user.set("rolID", Number(rolID));
+    if (activo !== undefined) user.set("activo", !!activo);
+    if (contraseña) {
+      if (!validatePassword(contraseña)) {
+        res.status(400).json({ message: "La contraseña no cumple con los requisitos", error: true });
+        return;
+      }
+      const hashedPassword = await passwordHelper.HashPassword(contraseña);
+      user.set("contraseña", hashedPassword);
+    }
+    await user.save();
+    const safeUser = await Usuario.findByPk(id, {
+      attributes: { exclude: ["contraseña"] },
+      include: [{ model: Rol, as: "rol", attributes: ["id", "nombre", "descripcion"] }],
+    });
+    res.send({ message: "Usuario actualizado correctamente", error: false, data: safeUser });
+  } catch (e: any) {
+    console.error(e);
+    res.status(400).send({ message: e?.message || "Ocurrio un error", error: true });
+  }
+};
+
+const deleteUserAdmin = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params;
+    const currentUser = (req as any).user;
+    if (currentUser?.id && Number(currentUser.id) === Number(id)) {
+      res.status(400).json({ message: "No puedes eliminar tu propio usuario", error: true });
+      return;
+    }
+    const user: any = await Usuario.findOne({ where: { id, deleted: false } });
+    if (!user) {
+      res.status(404).json({ message: "Usuario no encontrado", error: true });
+      return;
+    }
+    await user.update({ deleted: true, activo: false });
+    res.send({ message: "Usuario eliminado correctamente", error: false });
+  } catch (e) {
+    console.error(e);
+    res.status(500).send({ message: "Ocurrio un error", error: true });
+  }
+};
+
+export default { login, register, logout, checkAuth, getAllUsers, getUserById, createUserAdmin, updateUserAdmin, deleteUserAdmin };

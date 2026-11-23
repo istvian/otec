@@ -4,5 +4,6 @@ export enum RolEnum {
   OPERADOR = 3,
   LEGAL = 4,
   ADMINISTRADOR = 5,
-  CUALQUIERA = 6,
+  RRHH = 6,
+  CUALQUIERA = 99,
 }

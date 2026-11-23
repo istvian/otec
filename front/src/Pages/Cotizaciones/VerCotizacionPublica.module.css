@@ -1,0 +1,273 @@
+.acciones {
+  display: flex;
+  flex-flow: row wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto 0.5rem;
+}
+
+.descargar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  background-color: var(--ruta-color);
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+
+.descargar:hover {
+  opacity: 0.85;
+}
+
+.documento {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto 2rem;
+  padding: 2.5rem;
+  background-color: #ffffff;
+  color: #0f172a;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
+}
+
+.encabezado {
+  display: flex;
+  flex-flow: row wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 3px solid var(--nav-color);
+}
+
+.encabezado h1 {
+  margin: 0;
+  font-size: 1.75rem;
+  color: var(--nav-color);
+  letter-spacing: -0.02em;
+}
+
+.encabezado p {
+  margin: 0.2rem 0 0;
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.identificacion {
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: flex-end;
+  gap: 0.25rem;
+  text-align: right;
+}
+
+.tipoDocumento {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--brand2-color);
+}
+
+.identificacion strong {
+  font-size: 1.25rem;
+  color: var(--nav-color);
+}
+
+.meta {
+  display: flex;
+  flex-flow: row wrap;
+  gap: 0.5rem 1.5rem;
+  padding: 0.9rem 0;
+  border-bottom: 1px solid #e2e8f0;
+  font-size: 0.85rem;
+  color: #475569;
+}
+
+.meta strong {
+  color: #0f172a;
+}
+
+.bloqueDosColumnas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.5rem;
+  padding: 1.25rem 0;
+}
+
+.bloqueDosColumnas h2,
+.seccion h2 {
+  margin: 0 0 0.5rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--nav-color);
+}
+
+.bloqueDosColumnas p {
+  margin: 0.2rem 0;
+  font-size: 0.9rem;
+  color: #334155;
+}
+
+.destacado {
+  font-weight: 700;
+  font-size: 1rem !important;
+  color: #0f172a !important;
+}
+
+.seccion {
+  padding: 1rem 0;
+  border-top: 1px solid #e2e8f0;
+}
+
+.textoPlano {
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: #1e293b;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.tabla {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.5rem;
+}
+
+.tabla th,
+.tabla td {
+  padding: 0.6rem 0.75rem;
+  border: 1px solid #cbd5e1;
+  font-size: 0.88rem;
+  white-space: normal;
+}
+
+.tabla th {
+  background-color: #f1f5f9;
+  color: #334155;
+  text-align: left;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.tabla th:not(:first-child),
+.tabla td:not(:first-child) {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.tabla tfoot td {
+  background-color: #e0f2fe;
+  color: var(--nav-color);
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.nota {
+  margin: 0.6rem 0 0;
+  font-size: 0.78rem;
+  color: #64748b;
+  font-style: italic;
+}
+
+.pie {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e2e8f0;
+  color: #64748b;
+  font-size: 0.78rem;
+}
+
+.pie p {
+  margin: 0.2rem 0;
+}
+
+.enlace {
+  color: var(--ruta-color);
+  overflow-wrap: anywhere;
+}
+
+.estadoCarga {
+  width: 100%;
+  max-width: 700px;
+  margin: 3rem auto;
+  padding: 2rem;
+  border-radius: 10px;
+  background-color: var(--box-color);
+  text-align: center;
+}
+
+.estadoCarga h1 {
+  margin-top: 0;
+  color: var(--nav-color);
+}
+
+.estadoBorrador,
+.estadoEnviada,
+.estadoAceptada,
+.estadoRechazada {
+  display: inline-block;
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.estadoBorrador {
+  background-color: #e2e8f0;
+  color: #334155;
+}
+
+.estadoEnviada {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+.estadoAceptada {
+  background-color: #dcfce7;
+  color: #166534;
+}
+
+.estadoRechazada {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+@media (max-width: 700px) {
+  .documento {
+    padding: 1.25rem;
+  }
+}
+
+@media print {
+  .acciones {
+    display: none;
+  }
+
+  .documento {
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    box-shadow: none;
+    border-radius: 0;
+  }
+
+  .estadoBorrador,
+  .estadoEnviada,
+  .estadoAceptada,
+  .estadoRechazada {
+    border: 1px solid #94a3b8;
+  }
+}

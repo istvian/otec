@@ -6,7 +6,7 @@ import { Btn } from "../../Components/Btn/Btn";
 import { Box } from "../../Components/Box/Box";
 import { Title } from "../../Components/Title/Title";
 import type { RegisterData } from "../../types/general";
-import { Login, Register } from "../../Helpers/APIConnector";
+import { Register } from "../../Helpers/APIConnector";
 import { Link } from "react-router-dom";
 
 export function RegisterPage() {

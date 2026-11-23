@@ -1,0 +1,18 @@
+.tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+.tab,
+.tabActive {
+  padding: 0.4rem 0.8rem;
+  border: 1px solid #ccc;
+  background: #fff;
+  cursor: pointer;
+  border-radius: 4px;
+}
+.tabActive {
+  background: #2563eb;
+  color: #fff;
+  border-color: #2563eb;
+}

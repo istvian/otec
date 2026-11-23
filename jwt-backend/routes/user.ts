@@ -2,6 +2,8 @@ import express from "express";
 import userController from "../controllers/userController";
 var router = express.Router();
 import rateLimit from "express-rate-limit";
+import { verificarRol } from "../middlewares/authMiddleware";
+import { RolEnum } from "../middlewares/rolEnum";
 
 export const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // Ventana de bloqueo: 15 minutos
@@ -22,5 +24,9 @@ router.post("/register", userController.register);
 router.get("/check", userController.checkAuth);
 router.get("/logout", userController.logout);
 router.get("/", userController.getAllUsers);
+router.get("/:id", verificarRol(RolEnum.CUALQUIERA), userController.getUserById);
+router.post("/", verificarRol(RolEnum.ADMINISTRADOR), userController.createUserAdmin);
+router.patch("/:id", verificarRol(RolEnum.ADMINISTRADOR), userController.updateUserAdmin);
+router.delete("/:id", verificarRol(RolEnum.ADMINISTRADOR), userController.deleteUserAdmin);
 
 export default router;
