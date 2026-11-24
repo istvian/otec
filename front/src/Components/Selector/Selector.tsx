@@ -32,9 +32,7 @@ export function Selector({
           if (setValue) setValue(numberValue);
         }}
       >
-        <option disabled value={0}>
-          {firstOption}
-        </option>
+        <option value={0}>{firstOption}</option>
         {options.map((item, index) => {
           return (
             <option
